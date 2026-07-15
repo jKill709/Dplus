@@ -7,22 +7,22 @@ An SBC-based, distributed computer vision system for creating 3D datasets from a
 This project is composed to two 'sides':
 
 - A data generation side (C++ on SBC)
- - Operates on SBC (raspberryPi 3B+ were used)
- - Multiple 'node' devices, each with one web cam, capture images of a common detection space, and run one or more traditional 2D computer vision detection algorithm on the image
- - Detections from each node are transmitted via JSON over MQTT through dedicated AP to a central 'Hub' pi which creates 3D reconstructions of each detected point.
- - The hub sends reconstructed frames to Desktop Viewer for live viewing via JSON over MQTT through building Wi-Fi, separated from dedicated AP
- - Programs (node and hub) runs as a service daemon
- - The hub commands and synchronizes activities of its' nodes
+    - Operates on SBC (raspberryPi 3B+ were used)
+    - Multiple 'node' devices, each with one web cam, capture images of a common detection space, and run one or more traditional 2D computer vision detection algorithm on the image
+    - Detections from each node are transmitted via JSON over MQTT through dedicated AP to a central 'Hub' pi which creates 3D reconstructions of each detected point.
+    - The hub sends reconstructed frames to Desktop Viewer for live viewing via JSON over MQTT through building Wi-Fi, separated from dedicated AP
+    - Programs (node and hub) runs as a service daemon
+    - The hub commands and synchronizes activities of its' nodes
 - A Maintenance and Viewing Side (C# on Desktop)
- - 'Main' Form
-  - Live data logging
-  - Access to other forms
- - 'Uploader'
-  - Can start/stop services
-  - Push/Compile/Distribute new Code to Nodes and Hubs
-  - Downloads device logs, images, and detection artifacts
- - 'Viewer'
-  - Can view live reconstruction output and logged data
+    - 'Main' Form
+        - Live data logging
+        - Access to other forms
+    - 'Uploader'
+        - Can start/stop services
+        - Push/Compile/Distribute new Code to Nodes and Hubs
+        - Downloads device logs, images, and detection artifacts
+    - 'Viewer'
+        - Can view live reconstruction output and logged data
 
 ## Project File Architecture
 ```text
@@ -65,7 +65,7 @@ X:\YourDir
     ├───.git 
     ├─── mLogger
     │ └───mLogger.csproj  // must be present
-    ├─── mLogger_Winforms
+    └─── mLogger_Winforms
       └───mLogger_Winforms.csproj
 ```
 
