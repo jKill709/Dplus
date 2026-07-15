@@ -1,0 +1,45 @@
+# =========================
+# Ignore everything
+# =========================
+
+*
+
+# =========================
+# Allow directories
+# =========================
+
+!*/
+
+# Allow src directory
+
+!src/
+
+# =========================
+
+# Allow ONLY C++ source files in src
+
+# =========================
+
+!src/*.cpp
+!src/*.h
+!src/*.hpp
+!src/**/*.cpp
+!src/**/*.h
+!src/**/*.hpp
+
+# =========================
+
+# Keep gitignore itself
+
+# =========================
+
+!.gitignore
+
+# =========================
+
+# Explicit exclusions (optional safety)
+
+# =========================
+
+CamCal.cpp
+FaceTest.cpp

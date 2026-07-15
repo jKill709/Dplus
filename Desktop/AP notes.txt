@@ -1,0 +1,53 @@
+Hub:  ip neigh show dev wlan0
+	Shows other ips on wlan0
+
+Hub:	ip addr show wlan1
+Node:	ip addr show wlan0
+
+Node:	cat /sys/class/rfkill/*/soft
+
+Node:	sudo iwlist wlan0 scan | grep Cluster -A4
+Hub:	sudo journalctl -u hostapd -n 20
+
+Node:	sudo journalctl -u wpa_supplicant -n 30
+
+Either:	sudo iw dev wlan1 scan | grep SSID
+	sudo iw wlan0 scan | grep SSID
+
+Add New Node:
+	Image SD card using 'Image Writer'
+	Power on New Node
+	On Node:
+		sudo hostnamectl set-hostname NodeX
+			Change Host Name
+		hostname
+			Check it
+		sudo nano /etc/hosts
+			change:
+				127.0.1.1    Node1
+			to:
+				127.0.1.1    NodeX
+		sudo rm /etc/machine-id
+			removes machine-id
+		sudo systemd-machine-id-setup
+			reqgens machine-id
+		
+
+
+	On hub:
+		ip neigh show dev wlan0
+			-or-
+		arp -a
+			to get new Node's MAC
+		sudo nano /etc/dnsmasq.conf
+			Uncomment and add MAC for new Node
+		sudo systemctl restart dnsmasq
+	Reboot all
+	check it all out
+		From Hub:
+			ip neigh show dev wlan0
+				confirm new IP
+		ssh into new ip
+			confirm hostname
+		timedatectl
+			Check synchronized: yes

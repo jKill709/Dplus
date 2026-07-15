@@ -1,0 +1,79 @@
+# =========================
+# Visual Studio
+# =========================
+
+.vs/
+*.user
+*.suo
+
+# Build output
+
+bin/
+obj/
+x64/
+Debug/
+Release/
+
+# =========================
+# CMake / Native Builds
+# =========================
+
+build/
+out/
+cmake-build-*/
+
+*.o
+*.obj
+*.a
+*.so
+*.dll
+*.lib
+*.exp
+*.pdb
+
+# =========================
+# Logs / Runtime Data
+# =========================
+
+Logs/
+logs/
+
+# =========================
+# Local Configuration
+# =========================
+
+managerSettings.json
+!managerSettings.example.json
+
+# =========================
+# Large Images / Disk Images
+# =========================
+
+*.img
+
+# =========================
+# Package Managers
+# =========================
+
+vcpkg/
+packages/
+
+# =========================
+# OS / Editor Junk
+# =========================
+
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# =========================
+# Optional: Temporary Files
+# =========================
+
+*.tmp
+*.log
+*.cache
+
+!onnxruntime.dll
+!src/images/*.png
+/managerSettings - Copy.json

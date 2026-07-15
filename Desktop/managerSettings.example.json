@@ -1,0 +1,498 @@
+{
+  "RemoteHomePath": "home/on/pis/",
+  "RemoteCapturesPath": "captures/on/pis/",
+  "RemoteReconstructionsPath": "reconstructions/on/pis/",
+  "RemoteLogPath": "logs/on/pis/",
+  "RemoteModelsPath": "models/on/pis/",
+  "UploadDirectory": "src/on/pis/",
+  "LocalLogPath": "X:\\apps\\Dplus\\Logs\\",
+  "LocalModelsPath": "X:\\apps\\Dplus\\Logs\\",
+  "SourceFilesDirectory": "X:\\resources\\models\\",
+  "SourceFilesDirectory": "X:\\apps\\Dplus\\Embedded\\src\\",
+  "NoImagePath": "X:\\apps\\Dplus\\Desktop\\src\\images\\No Image.png",
+  "LiveFrameBufferLimit": 1000,
+  "SavedFrameBufferLimit": 1000,
+  "OrthographicViewerProfileToUse": "Standard",
+  "OrthoViewerSettings": [
+    {
+      "profileName": "Standard",
+      "MinGridSpacing": 20,
+      "MaxGridSpacing": 100,
+      "GridSpacing": 10
+    }
+  ],
+  "HubTelemetryTopic": "hubTelemetry",
+  "HubCommandTopic": "hubCommands",
+  "NodeTelemetryTopic": "nodeTelemetry",
+  "NodeCommandTopic": "nodeCommands",
+  "ForceExtrinsicsRecalibration": false,
+  "RepropuctionErrThreshAtExtrinsicsCalcualtion": 10,
+  "MaxMQTTQueueSize": 100,
+  "SaveReconstructions": true,
+  "BroadcastReconstructions": true,
+  "MaxFrameLatenessMs": 1000,
+  "ForceIntrinsicsRecalibration": false,
+  "YoloPoseDetProfiles": [
+    {
+      "name": "Image",
+      "useModel": true,
+      "saveWholeDetectionImage": true,
+      "savePartialDetectionImage": true,
+      "modelPath": "yolo11n-pose.onnx",
+      "cocoPKcount": 17,
+      "detectConfThreshold": 0.25,
+      "kpDetectThreshold": 0.45,
+      "nmsThreshold": 0,
+      "iouThreshold": 0,
+      "ReconstructionThreshold": 0
+    },
+    {
+      "name": "NoImage",
+      "useModel": true,
+      "saveWholeDetectionImage": false,
+      "savePartialDetectionImage": false,
+      "modelPath": "yolo11n-pose.onnx",
+      "cocoPKcount": 17,
+      "detectConfThreshold": 0.25,
+      "kpDetectThreshold": 0.45,
+      "nmsThreshold": 0,
+      "iouThreshold": 0,
+      "ReconstructionThreshold": 0
+    },
+    {
+      "name": "Off",
+      "useModel": false,
+      "saveWholeDetectionImage": false,
+      "savePartialDetectionImage": false,
+      "modelPath": "yolo11n-pose.onnx",
+      "cocoPKcount": 17,
+      "detectConfThreshold": 0.25,
+      "kpDetectThreshold": 0.45,
+      "nmsThreshold": 0,
+      "iouThreshold": 0,
+      "ReconstructionThreshold": 0
+    }
+  ],
+  "YoloObjectDetProfiles": [
+    {
+      "name": "Image",
+      "useModel": true,
+      "saveWholeDetectionImage": true,
+      "savePartialDetectionImage": true,
+      "modelPath": "best.onnx",
+      "classes": "classes.txt",
+      "objectConfidence": 0.25,
+      "iouThreshold": 0.45
+    },
+    {
+      "name": "NoImage",
+      "useModel": true,
+      "saveWholeDetectionImage": false,
+      "savePartialDetectionImage": false,
+      "modelPath": "best.onnx",
+      "classes": "classes.txt",
+      "objectConfidence": 0.25,
+      "iouThreshold": 0.45
+    },
+    {
+      "name": "Off",
+      "useModel": false,
+      "saveWholeDetectionImage": false,
+      "savePartialDetectionImage": false,
+      "modelPath": "best.onnx",
+      "classes": "classes.txt",
+      "objectConfidence": 0.25,
+      "iouThreshold": 0.45
+    }
+  ],
+  "FaceIDDetProfiles": [
+    {
+      "name": "Image",
+      "useHaarFaceDetection": true,
+      "saveHaarDetections": true,
+      "haarFaceModel": "haar_face.xml",
+      "useLBPHFaceRecognition": true,
+      "saveLBPHRecognitions": true,
+      "lbphFaceRecognizeModel": "face_trained.yml",
+      "FaceClassNames": "classes.txt"
+    },
+    {
+      "name": "NoImage",
+      "useHaarFaceDetection": true,
+      "saveHaarDetections": false,
+      "haarFaceModel": "haar_face.xml",
+      "useLBPHFaceRecognition": true,
+      "saveLBPHRecognitions": false,
+      "lbphFaceRecognizeModel": "face_trained.yml",
+      "FaceClassNames": "classes.txt"
+    },
+    {
+      "name": "Off",
+      "useHaarFaceDetection": false,
+      "saveHaarDetections": false,
+      "haarFaceModel": "haar_face.xml",
+      "useLBPHFaceRecognition": false,
+      "saveLBPHRecognitions": false,
+      "lbphFaceRecognizeModel": "face_trained.yml",
+      "FaceClassNames": "classes.txt"
+    }
+  ],
+  "ChArUcoBoardDetProfiles": [
+    {
+      "name": "Image",
+      "useChArUcoBoardDetection": true,
+      "saveChArUcoBoardDetections": true,
+      "chArUcoBoardToUse": "BigMedium",
+      "RepErrThreshAtReconstruction": 500
+    },
+    {
+      "name": "NoImage",
+      "useChArUcoBoardDetection": true,
+      "saveChArUcoBoardDetections": false,
+      "chArUcoBoardToUse": "BigMedium",
+      "RepErrThreshAtReconstruction": 500
+    },
+    {
+      "name": "off",
+      "useChArUcoBoardDetection": false,
+      "saveChArUcoBoardDetections": false,
+      "chArUcoBoardToUse": "BigMedium",
+      "RepErrThreshAtReconstruction": 500
+    }
+  ],
+  "ChessboardDetProfiles": [
+    {
+      "name": "default",
+      "useChessboardDetection": true,
+      "saveChessboardDetections": true,
+      "chessboardToUse": "Small"
+    }
+  ],
+  "Hubs": [
+    {
+      "Name": "Hub1",
+      "Role": "Hub",
+      "isActive": false,
+      "ClusterID": "cluster",
+      "IPAddress": "YourNetworkIP",
+      "APAddress": "YourAPAddress",
+      "Username": "usr",
+      "Password": "pw",
+      "CameraIDnumber": 0
+    }
+  ],
+  "Nodes": [
+    {
+      "Name": "Node1",
+      "Role": "Node",
+      "isActive": true,
+      "ClusterID": "cluster",
+      "IPAddress": "YourNetworkIP",
+      "APAddress": "YourAPAddress",
+      "Username": "usr",
+      "Password": "pw",
+      "CameraIDnumber": 1
+    },
+    {
+      "Name": "Node2",
+      "Role": "Node",
+      "isActive": true,
+      "ClusterID": "cluster",
+      "IPAddress": "YourNetworkIP",
+      "APAddress": "YourAPAddress",
+      "Username": "usr",
+      "Password": "pw",
+      "CameraIDnumber": 2
+    }
+  ],
+  "Intrinsics": [],
+  "Extrinsics": [],
+  "SourceFiles": [
+    {
+      "FileName": "node.cpp",
+      "LastUploadTime": "1970-01-01T00:00:01",
+      "IsForHub": false,
+      "IsForNode": true
+    },
+    {
+      "FileName": "hub.cpp",
+      "LastUploadTime": "1970-01-01T00:00:01",
+      "IsForHub": true,
+      "IsForNode": false
+    },
+    {
+      "FileName": "calibration.h",
+      "LastUploadTime": "1970-01-01T00:00:01",
+      "IsForHub": true,
+      "IsForNode": true
+    },
+    {
+      "FileName": "camera.cpp",
+      "LastUploadTime": "1970-01-01T00:00:01",
+      "IsForHub": false,
+      "IsForNode": true
+    },
+    {
+      "FileName": "camera.h",
+      "LastUploadTime": "1970-01-01T00:00:01",
+      "IsForHub": false,
+      "IsForNode": true
+    },
+    {
+      "FileName": "detections.h",
+      "LastUploadTime": "1970-01-01T00:00:01",
+      "IsForHub": true,
+      "IsForNode": true
+    },
+    {
+      "FileName": "detectors.h",
+      "LastUploadTime": "1970-01-01T00:00:01",
+      "IsForHub": true,
+      "IsForNode": true
+    },
+    {
+      "FileName": "detectors.cpp",
+      "LastUploadTime": "1970-01-01T00:00:01",
+      "IsForHub": true,
+      "IsForNode": true
+    },
+    {
+      "FileName": "indicatorBank.cpp",
+      "LastUploadTime": "1970-01-01T00:00:01",
+      "IsForHub": true,
+      "IsForNode": true
+    },
+    {
+      "FileName": "indicatorBank.h",
+      "LastUploadTime": "1970-01-01T00:00:01",
+      "IsForHub": true,
+      "IsForNode": true
+    },
+    {
+      "FileName": "messages.hpp",
+      "LastUploadTime": "1970-01-01T00:00:01",
+      "IsForHub": true,
+      "IsForNode": true
+    },
+    {
+      "FileName": "nodeLink.cpp",
+      "LastUploadTime": "1970-01-01T00:00:01",
+      "IsForHub": true,
+      "IsForNode": true
+    },
+    {
+      "FileName": "nodeLink.h",
+      "LastUploadTime": "1970-01-01T00:00:01",
+      "IsForHub": true,
+      "IsForNode": true
+    },
+    {
+      "FileName": "nodeLogger.cpp",
+      "LastUploadTime": "1970-01-01T00:00:01",
+      "IsForHub": true,
+      "IsForNode": true
+    },
+    {
+      "FileName": "nodeLogger.h",
+      "LastUploadTime": "1970-01-01T00:00:01",
+      "IsForHub": true,
+      "IsForNode": true
+    },
+    {
+      "FileName": "roomViewer.cpp",
+      "LastUploadTime": "1970-01-01T00:00:01",
+      "IsForHub": true,
+      "IsForNode": false
+    },
+    {
+      "FileName": "roomViewer.h",
+      "LastUploadTime": "1970-01-01T00:00:01",
+      "IsForHub": true,
+      "IsForNode": false
+    },
+    {
+      "FileName": "settings.cpp",
+      "LastUploadTime": "1970-01-01T00:00:01",
+      "IsForHub": true,
+      "IsForNode": true
+    },
+    {
+      "FileName": "settings.h",
+      "LastUploadTime": "1970-01-01T00:00:01",
+      "IsForHub": true,
+      "IsForNode": true
+    },
+    {
+      "FileName": "stopwatch.h",
+      "LastUploadTime": "1970-01-01T00:00:01",
+      "IsForHub": true,
+      "IsForNode": true
+    }
+  ],
+  "RuntimeFiles": [
+    {
+      "FileName": "hub",
+      "IsForNode": false,
+      "Path": "/home/camcpp/hub"
+    },
+    {
+      "FileName": "hubSettings.json",
+      "IsForNode": false,
+      "Path": "/home/camcpp/src/hubSettings.json"
+    },
+    {
+      "FileName": "node",
+      "IsForNode": true,
+      "Path": "/home/camcpp/node"
+    },
+    {
+      "FileName": "nodeSettings.json",
+      "IsForNode": true,
+      "Path": "/home/camcpp/src/nodeSettings.json"
+    }
+  ],
+  "Models": [
+    {
+      "ModelName": "yolo11l-pose.onnx",
+      "ModelType": "YOLO11-Pose",
+      "LastPushTime": "1970-01-01T00:00:01"
+    },
+    {
+      "ModelName": "yolo11m-pose.onnx",
+      "ModelType": "YOLO11-Pose",
+      "LastPushTime": "1970-01-01T00:00:01"
+    },
+    {
+      "ModelName": "yolo11n-pose.onnx",
+      "ModelType": "YOLO11-Pose",
+      "LastPushTime": "1970-01-01T00:00:01"
+    },
+    {
+      "ModelName": "yolo11s-pose.onnx",
+      "ModelType": "YOLO11-Pose",
+      "LastPushTime": "1970-01-01T00:00:01"
+    },
+    {
+      "ModelName": "yolo11x-pose.onnx",
+      "ModelType": "YOLO11-Pose",
+      "LastPushTime": "1970-01-01T00:00:01"
+    },
+    {
+      "ModelName": "classes.txt",
+      "ModelType": "YOLO11-Objects",
+      "LastPushTime": "1970-01-01T00:00:01"
+    },
+    {
+      "ModelName": "base_optmized.onnx",
+      "ModelType": "YOLO11-Objects",
+      "LastPushTime": "1970-01-01T00:00:01"
+    },
+    {
+      "ModelName": "best.onnx",
+      "ModelType": "YOLO11-Objects",
+      "LastPushTime": "1970-01-01T00:00:01"
+    },
+    {
+      "ModelName": "best_int8.onnx",
+      "ModelType": "YOLO11-Objects",
+      "LastPushTime": "1970-01-01T00:00:01"
+    },
+    {
+      "ModelName": "best_optmized.onnx",
+      "ModelType": "YOLO11-Objects",
+      "LastPushTime": "1970-01-01T00:00:01"
+    },
+    {
+      "ModelName": "best_quant.onnx",
+      "ModelType": "YOLO11-Objects",
+      "LastPushTime": "1970-01-01T00:00:01"
+    },
+    {
+      "ModelName": "face_trained.yml",
+      "ModelType": "Haar-Face",
+      "LastPushTime": "1970-01-01T00:00:01"
+    },
+    {
+      "ModelName": "haar_face.xml",
+      "ModelType": "Haar-Face",
+      "LastPushTime": "1970-01-01T00:00:01"
+    }
+  ],
+  "ClusterProfileToUse": "default",
+  "ClusterProfiles": [
+    {
+      "profileName": "default",
+      "extrinsics": [],
+      "intrinsicsCaptureCount": 30,
+      "extrinsicsCaptureCount": 30,
+      "YoloPoseProfileToUse": "Image",
+      "YoloObjectProfileToUse": "Off",
+      "FaceIDProfileToUse": "Off",
+      "ChArUcoDetProfileToUse": "Image",
+      "ChessboardDetProfileToUse": "default",
+      "captureOnStartup": true,
+      "captureEachFrame": true,
+      "captureEachDetection": false,
+      "captureNewDetection": false,
+      "targetFrameRate": 0.75,
+      "indicatorType": "Common Cathode",
+      "introSequenceIterations": 2,
+      "introSequenceDelay": 100
+    }
+  ],
+  "Chessboards": [
+    {
+      "name": "Small",
+      "squaresX": 9,
+      "squaresY": 6,
+      "squareLength": 0.025
+    }
+  ],
+  "chArUcoBoards": [
+    {
+      "name": "Small",
+      "squaresX": 7,
+      "squaresY": 5,
+      "minDetections": 10,
+      "squareLength": 0.04,
+      "markerLength": 0.02,
+      "dictionaryID": 0
+    },
+    {
+      "name": "Medium",
+      "squaresX": 10,
+      "squaresY": 7,
+      "minDetections": 10,
+      "squareLength": 0.04,
+      "markerLength": 0.02,
+      "dictionaryID": 1
+    },
+    {
+      "name": "Large",
+      "squaresX": 14,
+      "squaresY": 10,
+      "minDetections": 10,
+      "squareLength": 0.04,
+      "markerLength": 0.02,
+      "dictionaryID": 2
+    },
+    {
+      "name": "BigSmall",
+      "squaresX": 2,
+      "squaresY": 3,
+      "minDetections": 10,
+      "squareLength": 0.3,
+      "markerLength": 0.15,
+      "dictionaryID": 0
+    },
+    {
+      "name": "BigMedium",
+      "squaresX": 7,
+      "squaresY": 5,
+      "minDetections": 10,
+      "squareLength": 0.12096,
+      "markerLength": 0.09,
+      "dictionaryID": 0
+    }
+  ]
+}
