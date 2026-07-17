@@ -61,7 +61,6 @@
             LiveLoggingBox.Name = "LiveLoggingBox";
             LiveLoggingBox.Size = new Size(953, 527);
             LiveLoggingBox.TabIndex = 2;
-            LiveLoggingBox.Text = "";
             // 
             // Main
             // 
