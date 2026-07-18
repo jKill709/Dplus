@@ -23,6 +23,7 @@ using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.Design.AxImporter;
 
 using mLogger;
+using jColorProviders;
 //using mLogger_WinForms;
 
 namespace Dplus_Desktop
@@ -51,6 +52,7 @@ namespace Dplus_Desktop
         private RigFrame? _currentFrame = null;
         private PrimitiveOverlayLayer _image1Overlay;
         private PrimitiveOverlayLayer _image2Overlay;
+        private FixedIndexColorProvider _colorProvider = new FixedIndexColorProvider();
 
         private Logger logger = Logger.Instance;
         //private TextBoxSink _sink = new TextBoxSink();
@@ -528,7 +530,7 @@ namespace Dplus_Desktop
                     for (int i = 0; i < cam.poseDets.Count; i++)
                     {
                         var det = cam.poseDets[i];
-                        var color = GetColor(i);
+                        var color = _colorProvider.GetColor(i);
 
                         // --- Detection Summary ---
                         var detNode = new TreeNode(
@@ -563,7 +565,7 @@ namespace Dplus_Desktop
                     for (int i = 0; i < cam.objectDets.Count; i++)
                     {
                         var det = cam.objectDets[i];
-                        var color = GetColor(i);
+                        var color = _colorProvider.GetColor(i);
 
                         var detNode = new TreeNode(
                             $"[{i}] Conf={det.Confidence:F2}, Class={det.ClassId}, Box=({det.Box.X:F1},{det.Box.Y:F1},{det.Box.Width:F1},{det.Box.Height:F1})"
@@ -585,7 +587,7 @@ namespace Dplus_Desktop
                     for (int i = 0; i < cam.faceDets.Count; i++)
                     {
                         var det = cam.faceDets[i];
-                        var color = GetColor(i);
+                        var color = _colorProvider.GetColor(i);
 
                         var detNode = new TreeNode(
                             $"[{i}] Conf={det.Confidence:F2}, Class={det.ClassId}, Box=({det.Box.X:F1},{det.Box.Y:F1},{det.Box.Width:F1},{det.Box.Height:F1})"
@@ -636,7 +638,7 @@ namespace Dplus_Desktop
                 for (int i = 0; i < frame.poseRecs.Count; i++)
                 {
                     var rec = frame.poseRecs[i];
-                    var color = GetColor(i);
+                    var color = _colorProvider.GetColor(i);
 
                     // --- Detection Summary ---
                     var recNodeItem = new TreeNode(
@@ -669,7 +671,7 @@ namespace Dplus_Desktop
                 for (int i = 0; i < frame.objectRecs.Count; i++)
                 {
                     var rec = frame.objectRecs[i];
-                    var color = GetColor(i);
+                    var color = _colorProvider.GetColor(i);
 
                     var recNodeItem = new TreeNode(
                         $"[{i}] Conf={rec.Confidence:F2}, Class={rec.ClassId}, Center=({rec.BoxCenter.X:F2},{rec.BoxCenter.Y:F2},{rec.BoxCenter.Z:F2})"
@@ -690,7 +692,7 @@ namespace Dplus_Desktop
                 for (int i = 0; i < frame.faceRecs.Count; i++)
                 {
                     var rec = frame.faceRecs[i];
-                    var color = GetColor(i);
+                    var color = _colorProvider.GetColor(i);
 
                     var recNodeItem = new TreeNode(
                         $"[{i}] Conf={rec.Confidence:F2}, Class={rec.ClassId}, Center=({rec.BoxCenter.X:F2},{rec.BoxCenter.Y:F2},{rec.BoxCenter.Z:F2})"
@@ -931,7 +933,7 @@ namespace Dplus_Desktop
             float yTextOffset = (float)(5 / intrinsics.K[1][1]); // 5 pixel offset converted to normalized coordinates
             for (int i = 0; i < detection.CharucoCorners.Count; i++)
             {
-                var color = GetColor(i);
+                var color = _colorProvider.GetColor(i);
                 Brush brush = new SolidBrush(color);
 
                 var kp = detection.CharucoCorners[i];
@@ -963,7 +965,7 @@ namespace Dplus_Desktop
 
             for (int i = 0; i < detection.ChessboardCorners.Count; i++)
             {
-                var color = GetColor(i);
+                var color = _colorProvider.GetColor(i);
                 Brush brush = new SolidBrush(color);
 
                 var kp = detection.ChessboardCorners[i];
@@ -1055,7 +1057,7 @@ namespace Dplus_Desktop
             Color currentColor;
             foreach (var detection in detections)
             {
-                currentColor = GetColor(i);
+                currentColor = _colorProvider.GetColor(i);
                 i++;
                 ShowPoseDetection(detection, CurrentOverlay, intrinsics, font, currentColor);
             }
@@ -1095,7 +1097,7 @@ namespace Dplus_Desktop
             Color currentColor;
             foreach (var detection in detections)
             {
-                currentColor = GetColor(i);
+                currentColor = _colorProvider.GetColor(i);
                 i++;
                 ShowObjectDetection(detection, CurrentOverlay, intrinsics, font, currentColor);
             }
@@ -1135,7 +1137,7 @@ namespace Dplus_Desktop
             Color currentColor;
             foreach (var detection in detections)
             {
-                currentColor = GetColor(i);
+                currentColor = _colorProvider.GetColor(i);
                 i++;
                 ShowFaceDetection(detection, CurrentOverlay, intrinsics, font, currentColor);
             }
@@ -1157,7 +1159,7 @@ namespace Dplus_Desktop
                 // Determine column based on ChArUco ID layout
                 int columnIndex = reconstruction.charucoIds[i] % cornerColumns;
 
-                Color color = GetColor(columnIndex);
+                Color color = _colorProvider.GetColor(columnIndex);
 
                 XYView.AddPoint(-corner.X, -corner.Y, color);
                 YZView.AddPoint(corner.Z, -corner.Y, color);
@@ -1175,7 +1177,7 @@ namespace Dplus_Desktop
             for (int r = 0; r < reconstructions.Count; r++)
             {
                 var rec = reconstructions[r];
-                var color = GetColor(r);
+                var color = _colorProvider.GetColor(r);
 
                 rec.Keypoints.ForEach(kp =>
                 {
@@ -1337,26 +1339,7 @@ namespace Dplus_Desktop
         {
             LivePause_Button_Click(sender, e);
         }
-        private Color GetColor(int index)
-        {
-            switch (index % colorCount)
-            {
-                case 0:
-                    return Color.Green;
-                case 1:
-                    return Color.Blue;
-                case 2:
-                    return Color.Red;
-                case 3:
-                    return Color.Magenta;
-                case 4:
-                    return Color.Cyan;
-                case 5:
-                    return Color.Yellow;
-                default:
-                    return Color.White;
-            };
-        }
+        
         private enum LivePlayerState
         {
             Play,
