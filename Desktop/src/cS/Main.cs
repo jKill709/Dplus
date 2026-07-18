@@ -26,7 +26,7 @@ namespace Dplus_Desktop
             InitializeComponent();
 
             _tbSink = new RichTextBoxSink(LiveLoggingBox);
-            _tbSink.AddSource("CamManager", true, Color.Blue);
+            _tbSink.AddSource("CamManager", true, Color.Red);
             logger.AddSink(_tbSink);
             logger.Log(LogLevel.INFO, "CamManager", "_tbSink Added");
 
@@ -37,7 +37,7 @@ namespace Dplus_Desktop
             logger.LogHeading(LogLevel.INFO, "CamManager", "Main Initialized");
         }
 
-        public void addSource(string source, bool andModules = true, Color color = default)
+        private void addSource(string source, bool andModules = true, Color color = default)
         {
             _tbSink.AddSource(source, andModules, color);
             logger.Log(LogLevel.INFO, "CamManager", $"Added source '{source}' to _tbSink");
@@ -49,6 +49,7 @@ namespace Dplus_Desktop
                 _uploader = new Uploader();
                 _uploader.FormClosed += (s, args) => _uploader = null; // cleanup
                 _uploader.Show();
+                _tbSink.AddSource("Uploader", true, Color.Green);
             }
             else
             {
@@ -64,6 +65,7 @@ namespace Dplus_Desktop
                 _viewer = new Viewer();
                 _viewer.FormClosed += (s, args) => _viewer = null; // cleanup
                 _viewer.Show();
+                _tbSink.AddSource("Viewer", true, Color.Blue);
             }
             else
             {
