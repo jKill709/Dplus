@@ -24,7 +24,6 @@ using static System.Windows.Forms.Design.AxImporter;
 
 using mLogger;
 using jColorProviders;
-//using mLogger_WinForms;
 
 namespace Dplus_Desktop
 {
@@ -43,7 +42,6 @@ namespace Dplus_Desktop
         private int colorCount = 6;
         private bool _isSyncing = false; // Flag to prevent recursive updates when changing selections programmatically
 
-        //private ViewerReconstructionClient _mqtt;
         private MqttWorker _worker;
 
         private List<RigFrame> _savedFrames = new();
@@ -55,13 +53,13 @@ namespace Dplus_Desktop
         private FixedIndexColorProvider _colorProvider = new FixedIndexColorProvider();
 
         private Logger logger = Logger.Instance;
-        //private TextBoxSink _sink = new TextBoxSink();
 
         public Viewer()
         {
             InitializeComponent();
 
             logger.LogHeading(mLogger.LogLevel.INFO, "Viewer", "Viewer Initialing");
+            AddLogSource("Viewer", Color.Blue, true);
 
             // Add Overlays to ImageViewers
             _image1Overlay = new PrimitiveOverlayLayer();
@@ -88,6 +86,7 @@ namespace Dplus_Desktop
                 LiveView_rButton.Checked = true;
             }
 
+
             AutofitViewers();
 
             UpdateViewers();
@@ -97,18 +96,14 @@ namespace Dplus_Desktop
             try
             {
                 logger.Log(mLogger.LogLevel.INFO, "Viewer", "Connecting to MQTT...");
+                AddLogSource("MQTT Worker", Color.Green, true);
+
                 Device currentHub = Settings.All.GetDeviceByName("Hub1");
 
-                //_mqtt = new ViewerReconstructionClient(currentHub.IPAddress, 1883, currentHub.ClusterID);
-                //_mqtt.OnRigFrameReceived += HandleIncomingFrame;
-
-                //await _mqtt.ConnectAsync();
                 _worker = new MqttWorker(currentHub.IPAddress, 1883, currentHub.ClusterID + "/hubTelemetry");
 
                 _worker.OnMessage += async e =>
                 {
-                    //HandleIncomingFrame(e);
-                    //await Task.CompletedTask;
                     string json = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
                     HandleIncomingFrame(json);
                     await Task.CompletedTask;
@@ -123,10 +118,13 @@ namespace Dplus_Desktop
                 logger.Log(mLogger.LogLevel.ERROR, "Viewer", $"MQTT connection failed: {ex.Message}");
             }
         }
+        private void AddLogSource(string source, Color color = default, bool andModules = true)
+        {
+            logger.AddSource(source, color, andModules);
+            logger.Log(mLogger.LogLevel.INFO, "Viewer", $"Added source '{source}' to _tbSink");
+        }
         private void HandleIncomingFrame(string jsonString)
         {
-            //const int MaxFrames = 1000;
-
             if (InvokeRequired)
             {
                 BeginInvoke(new Action(() => HandleIncomingFrame(jsonString)));
@@ -138,14 +136,8 @@ namespace Dplus_Desktop
 
             if (frame != null)
             {
-                //int currentIndex = LiveFrames_Bar.Value;
-
-                // Now on UI thread
                 _liveFrames.Add(frame);
-                //if (_liveFrames.Count > MaxFrames)
-                //{
-                //    _liveFrames.RemoveAt(0);
-                //}
+
                 LiveFrames_Bar.Minimum = 1;
                 LiveFrames_Bar.Maximum = _liveFrames.Count;
                 if (LiveFrames_Bar.Value > LiveFrames_Bar.Maximum)
@@ -159,11 +151,6 @@ namespace Dplus_Desktop
 
                 logger.Log(mLogger.LogLevel.INFO, "Viewer", $"Received frame: CmdID={frame.commandID}, Time={frame.Timestamp:HH:mm:ss.fff}, Cams={frame.camFrames.Count}, PoseRecs={frame.poseRecs?.Count ?? 0}, ObjectRecs={frame.objectRecs?.Count ?? 0}, FaceRecs={frame.faceRecs?.Count ?? 0}, ChArUcoRec={(frame.charucoRec != null ? "Yes" : "No")}");
 
-                // Optional: logging
-                //File.WriteAllText(
-                //    $"frame_{frame.commandID}_{frame.Timestamp.Ticks}.json",
-                //    System.Text.Json.JsonSerializer.Serialize(frame, new JsonSerializerOptions { WriteIndented = true })
-                //);
                 if (_livePlayerState == LivePlayerState.Disconected)
                 {
                     _livePlayerState = LivePlayerState.Play;
@@ -171,16 +158,12 @@ namespace Dplus_Desktop
                 }
                 if ((LiveView_rButton.Checked) && (_livePlayerState == LivePlayerState.Play))
                 {
-                    //OutputText("Setting Current Frame to latest live frame", mLogger.LogLevel.INFO);
-                    //_currentFrame = frame;
-
                     _isSyncing = true;
                     LiveFrames_Bar.Value = _liveFrames.Count;
                     _isSyncing = false;
                     UpdateViewers();
                 }
 
-                //LiveFramesIndex_Label.Text = $"{LiveFrames_Bar.Value}/{_liveFrames.Count}";
                 LiveViewInfo_Label.Text = $"{LiveFrames_Bar.Value}/{LiveFrames_Bar.Maximum}";
                 LiveViewTimestamp_Label.Text = $"{_currentFrame?.Timestamp:HH:mm:ss.fff}";
                 if (_liveFrames.Count >= 2)
@@ -222,7 +205,7 @@ namespace Dplus_Desktop
 
                             if (rigFrame != null)
                             {
-                                logger.Log(mLogger.LogLevel.INFO, "Viewer", $"Deserialized CommandID: {rigFrame?.commandID}: {rigFrame?.camFrames.Count} frames, {rigFrame?.charucoRec?.charucoIds.Count()} charuco IDs");
+                                //logger.Log(mLogger.LogLevel.INFO, "Viewer", $"Deserialized CommandID: {rigFrame?.commandID}: {rigFrame?.camFrames.Count} frames, {rigFrame?.charucoRec?.charucoIds.Count()} charuco IDs");
                                 framePairs.Add((rigFrame, fileName));
                             }
                             else
@@ -1257,7 +1240,7 @@ namespace Dplus_Desktop
             // If Enabling Live Feed, Then
             //  Enable Live Controls
             LiveFrames_Bar.Enabled = enable;
-            //LiveFramesIndex_Label.Enabled = enable;
+            //LiveFramesIndex_Label.andModules = enable;
             LiveRewind_Button.Enabled = enable;
             LivePrevious_Button.Enabled = enable;
             LivePause_Button.Enabled = enable;
