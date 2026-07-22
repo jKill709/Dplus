@@ -86,7 +86,6 @@ namespace Dplus_Desktop
                 LiveView_rButton.Checked = true;
             }
 
-
             AutofitViewers();
 
             UpdateViewers();

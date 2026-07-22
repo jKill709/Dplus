@@ -23,10 +23,9 @@ namespace Dplus_Desktop
         public Uploader()
         {
             InitializeComponent();
-            
-            logger.AddSink(_sink);
 
             logger.LogHeading(LogLevel.INFO, "Uploader", "Uploader Initialing");
+            AddLogSource("Viewer", Color.Blue, true);
 
             LastUploadTime = DateTime.MinValue;
             hubComs = new Dictionary<string, mCommunicator>();
@@ -66,6 +65,11 @@ namespace Dplus_Desktop
             logger.RemoveSink(_sink);
         }
 
+        private void AddLogSource(string source, Color color = default, bool andModules = true)
+        {
+            logger.AddSource(source, color, andModules);
+            logger.Log(mLogger.LogLevel.INFO, "Viewer", $"Added source '{source}' to _tbSink");
+        }
         private void SaveManagedFiles()
         {
             SaveSourceFiles();
