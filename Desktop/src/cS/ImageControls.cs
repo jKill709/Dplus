@@ -8,6 +8,8 @@ using System.Drawing.Drawing2D;
 using System.Numerics;
 using System.Windows.Forms;
 
+using Dplus_Desktop.SettingsManager;
+
 namespace Dplus_Desktop
 {
     #region Layer Interfaces

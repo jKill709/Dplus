@@ -1,5 +1,4 @@
-﻿using mLogger;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -9,6 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.LinkLabel;
+
+using Dplus_Desktop.SettingsManager;
+using mLogger;
 
 namespace Dplus_Desktop
 {

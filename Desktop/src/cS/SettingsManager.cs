@@ -9,7 +9,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 using mLogger;
 
-namespace Dplus_Desktop
+namespace Dplus_Desktop.SettingsManager
 {
     public class FlexibleDateTimeConverter : JsonConverter<DateTime?>
     {
@@ -631,6 +631,7 @@ namespace Dplus_Desktop
     {
         public string FileName { get; set; } = string.Empty;
         public DateTime? LastUploadTime { get; set; }
+        public DateTime? LastModifiedTime { get; set; }
         public bool IsForHub { get; set; } = false;
         public bool IsForNode { get; set; } = false;
     }
@@ -639,11 +640,15 @@ namespace Dplus_Desktop
         public string FileName { get; set; } = string.Empty;
         public bool IsForNode { get; set; } = false;
         public string Path { get; set; } = string.Empty;
+        public DateTime? LastSourceChangeTime { get; set; }
+        public DateTime? LastCompliedTime { get; set; }
+        public DateTime? LastPushedTime { get; set; }
     }
     public class ModelFile
     {
         public string ModelName { get; set; } = string.Empty;
         public string ModelType { get; set; } = string.Empty;
+        public DateTime? LastModifiedTime { get; set; }
         public DateTime? LastPushTime { get; set; } = null;
     }
 

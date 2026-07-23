@@ -6,6 +6,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
+using Dplus_Desktop.SettingsManager;
 using jCommunicator;
 using mLogger;
 
@@ -68,7 +69,7 @@ namespace Dplus_Desktop
         private void AddLogSource(string source, Color color = default, bool andModules = true)
         {
             logger.AddSource(source, color, andModules);
-            logger.Log(mLogger.LogLevel.INFO, "Viewer", $"Added source '{source}' to _tbSink");
+            logger.Log(mLogger.LogLevel.INFO, "Uploader", $"Added source '{source}' to _tbSink");
         }
         private void SaveManagedFiles()
         {
@@ -922,7 +923,7 @@ namespace Dplus_Desktop
         private void UploadFiles()
         {
             UploadSourceFiles();
-            UploadModelFiles(); // Implement if needed
+            UploadModelFiles();
         }
         private void UploadSourceFiles()
         {

@@ -22,6 +22,7 @@ using System.Windows.Forms;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.Design.AxImporter;
 
+using Dplus_Desktop.SettingsManager;
 using mLogger;
 using jColorProviders;
 
