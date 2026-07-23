@@ -5,20 +5,22 @@ using System.Drawing;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+
+using jCommunicator;
 using mLogger;
+
 
 
 namespace Dplus_Desktop
 {
     public partial class Uploader : Form
     {
-        Dictionary<string, mCommunicator> hubComs;
-        mCommunicator currentHub;
+        Dictionary<string, Communicator> hubComs;
+        Communicator currentHub;
 
         DateTime LastUploadTime;
 
         private Logger logger = Logger.Instance;
-        private RichTextBoxSink _sink;
 
         public Uploader()
         {
@@ -28,11 +30,11 @@ namespace Dplus_Desktop
             AddLogSource("Viewer", Color.Blue, true);
 
             LastUploadTime = DateTime.MinValue;
-            hubComs = new Dictionary<string, mCommunicator>();
+            hubComs = new Dictionary<string, Communicator>();
 
             foreach (Device hub in Settings.All.Hubs)
             {
-                hubComs.Add(hub.ClusterID, new mCommunicator(hub.IPAddress, hub.Username, hub.Password));
+                hubComs.Add(hub.ClusterID, new Communicator(hub.IPAddress, hub.Username, hub.Password));
                 Clusters_Box.Items.Add(hub.ClusterID);
             }
 
@@ -61,8 +63,6 @@ namespace Dplus_Desktop
             SaveManagedFiles();
 
             logger.LogHeading(LogLevel.INFO, "Uploader", "Uploader Exiting");
-
-            logger.RemoveSink(_sink);
         }
 
         private void AddLogSource(string source, Color color = default, bool andModules = true)
@@ -677,7 +677,7 @@ namespace Dplus_Desktop
         {
             checkServiceStatus(hubComs[Clusters_Box.Text]);
         }
-        private void checkServiceStatus(mCommunicator com)
+        private void checkServiceStatus(Communicator com)
         {
             string hubServiceName = "hub.service";
             string nodeServiceName = "node.service";
@@ -809,7 +809,7 @@ namespace Dplus_Desktop
             checkSSHDevice(currentHub, true);
             HighlightModifiedFiles();
         }
-        private bool checkSSHDevice(mCommunicator com, bool verbose)
+        private bool checkSSHDevice(Communicator com, bool verbose)
         {
             bool allConnected = true;
 

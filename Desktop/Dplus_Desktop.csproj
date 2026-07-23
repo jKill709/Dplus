@@ -34,6 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\libs\jCommunicator\jCommunicator\jCommunicator.csproj" />
     <ProjectReference Include="..\..\..\libs\mLogger\mLogger\mLogger.csproj" />
     <ProjectReference Include="..\..\..\libs\mLogger\mLogger_WinForms\mLogger_WinForms.csproj" />
   </ItemGroup>
