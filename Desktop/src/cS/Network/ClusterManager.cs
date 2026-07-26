@@ -43,10 +43,6 @@ namespace Dplus_Desktop
 
         public bool CheckSSH(bool verbose)
         {
-            bool allConnected = true;
-
-            //foreach (var (device, communicator) in Settings.All.Hubs.Zip(hubs, (d, c) => (d, c)))
-            //{
             string host = _hubCom._host;
             string username = _hubCom._username;
 
@@ -67,7 +63,6 @@ namespace Dplus_Desktop
                 else
                 {
                     logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Failed to connect to {host} without error.\n");
-                    isCnctd = false;
                 }
             }
             catch (Renci.SshNet.Common.SshAuthenticationException authEx)
@@ -94,10 +89,7 @@ namespace Dplus_Desktop
                     logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Total connection attempt time for {host}: {sw.ElapsedMilliseconds} ms.\n");
             }
 
-            if (!isCnctd)
-                allConnected = false;
-
-            return allConnected;
+            return isCnctd;
         }
         public ServiceStatus CheckDeviceServiceStatus(string nodeName)
         {
@@ -194,9 +186,9 @@ namespace Dplus_Desktop
                 string filePath = Path.Combine(Settings.All.SourceFilesDirectory, file.FileName);
                 string remotePath;
                 if (file.IsForHub)
-                    remotePath = Path.Combine(Settings.All.UploadDirectory, "_hub/", file.FileName).Replace("\\", "/");
+                    remotePath = Path.Combine(Settings.All.UploadDirectory, "hub/", file.FileName).Replace("\\", "/");
                 else
-                    remotePath = Path.Combine(Settings.All.UploadDirectory, "device/", file.FileName).Replace("\\", "/");
+                    remotePath = Path.Combine(Settings.All.UploadDirectory, "node/", file.FileName).Replace("\\", "/");
 
                 if (_hubCom.IsConnected)
                 {
@@ -206,7 +198,7 @@ namespace Dplus_Desktop
                         file.LastUploadTime = DateTime.MinValue;
                 }
                 if (File.Exists(filePath))
-                    file.LastUploadTime = File.GetLastWriteTime(filePath);
+                    file.LastModifiedTime = File.GetLastWriteTime(filePath);
                 else
                     file.LastUploadTime = DateTime.MinValue;
             }
@@ -230,34 +222,44 @@ namespace Dplus_Desktop
                         {
                             file.LastSourceChangeTime = File.GetLastWriteTime("C:\\Users\\jerem\\OneDrive\\Documents\\Projects\\Programming\\apps\\Dplus\\Desktop\\managerSettings.json");
                             file.LastCompliedTime = File.GetLastWriteTime(Settings.All.SourceFilesDirectory + "Node1Settings.json");
-                            file.LastPushedTime = _hubCom.NodeFileLastModified("/home/camcpp/src/hubSettings.json", "10.0.0.11");
+                            file.LastPushedTime = _hubCom.NodeFileLastModified("/home/camcpp/src/nodeSettings.json", "10.0.0.11");
                         }
                     }
                     else
                     {
                         //bin file
 
-                        bool isHub;
                         if (!file.IsForNode)
                         {
-                            isHub = true;
                             file.LastCompliedTime = _hubCom.HubFileLastModified("/home/camcpp/hub");
                             file.LastPushedTime = _hubCom.HubFileLastModified("/home/camcpp/hub");
+
+                            file.LastSourceChangeTime = DateTime.MinValue;
+                            foreach (SourceFile sFile in Settings.All.SourceFiles)
+                            {
+                                if (sFile.IsForHub)
+                                {
+                                    if (sFile.LastModifiedTime > file.LastSourceChangeTime)
+                                    {
+                                        file.LastSourceChangeTime = sFile.LastModifiedTime;
+                                    }
+                                }
+                            }
                         }
                         else
                         {
-                            isHub = false;
                             file.LastCompliedTime = _hubCom.HubFileLastModified("/home/camcpp/node");
                             file.LastPushedTime = _hubCom.NodeFileLastModified("/home/camcpp/node", "10.0.0.11");
-                        }
 
-                        foreach (SourceFile sFile in Settings.All.SourceFiles)
-                        {
-                            if (isHub == sFile.IsForHub)
+                            file.LastSourceChangeTime = DateTime.MinValue;
+                            foreach (SourceFile sFile in Settings.All.SourceFiles)
                             {
-                                if (sFile.LastModifiedTime > file.LastSourceChangeTime)
+                                if (sFile.IsForNode)
                                 {
-                                    file.LastSourceChangeTime = sFile.LastModifiedTime;
+                                    if (sFile.LastModifiedTime > file.LastSourceChangeTime)
+                                    {
+                                        file.LastSourceChangeTime = sFile.LastModifiedTime;
+                                    }
                                 }
                             }
                         }
@@ -273,7 +275,7 @@ namespace Dplus_Desktop
                 file.LastModifiedTime = File.GetLastWriteTime(Path.Combine(Settings.All.LocalModelsPath, file.ModelName));
                 if (_hubCom.IsConnected)
                 {
-                    file.LastPushTime = _hubCom.NodeFileLastModified(Path.Combine(Settings.All.RemoteModelsPath, file.ModelName), "10.0.0.11");
+                    file.LastPushTime = _hubCom.NodeFileLastModified(Path.Combine(Settings.All.RemoteModelsPath, file.ModelType, file.ModelName).Replace("\\", "/"), "10.0.0.11");
                 }
             }
         }
@@ -388,7 +390,6 @@ namespace Dplus_Desktop
         }
         private bool DownloadCalibration()
         {
-            bool returnValue = false;
             string HubSettingsStartingPath = "/home/camcpp/src/hubSettings.json";
             string BaseLocalLogDir = Settings.All.LocalLogPath;
             string HubCalibrationSettingsFile = Path.Combine(BaseLocalLogDir, _hub.Name, "hubCalibrationSettings.json");
@@ -398,15 +399,13 @@ namespace Dplus_Desktop
                 var info = new FileInfo(HubCalibrationSettingsFile);
 
                 int newDataPoints = Settings.MergeNewCalibrationData(HubCalibrationSettingsFile);
-                returnValue = true;
+                return true;
             }
             else
             {
                 logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"[{_hub.Name}] ⚠ Download failed: {HubCalibrationSettingsFile}\n");
-                returnValue = false;
+                return false;
             }
-
-            return returnValue;
         }
         private bool DownloadLogs()
         {
@@ -416,12 +415,6 @@ namespace Dplus_Desktop
 
             // Hub logs
             {
-                //OutputText($"Checking logs on {_hub.Name}...\n", LogLevel.INFO);
-
-                // Ask remote system for a list of .log files
-                //string cmd = $"ls -1 {remoteLogDir}*.log 2>/dev/null";
-                //string result = _hubCom.ExecuteHubCommand(cmd);
-                //string[] remoteFiles = result.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
                 string[] remoteFiles = _hubCom.GetListOfHubFiles(remoteLogDir, "log");
 
                 if (remoteFiles.Length == 0)
@@ -704,7 +697,44 @@ namespace Dplus_Desktop
             //currentCluster.ExecuteHubCommand("g++ -O2 -o device  /home/camcpp/src/*.cpp $(pkg-config --cflags --libs opencv4) -lgpiod -lonnxruntime -I/usr/local/include");    // release
             _hubCom.ExecuteHubCommand("make -C /home/camcpp/build");
         }
+        public void CreateSettingsFiles()
+        {
+            logger.Log(mLogger.LogLevel.INFO, "Uploader", "Creating new settings files...\n");
+            string hubPath = Settings.All.SourceFilesDirectory + "hubSettings.json";
+            string backupHubPath = Settings.All.SourceFilesDirectory + "hubSettings_backup.json";
+            if (File.Exists(hubPath))
+            {
+                logger.Log(mLogger.LogLevel.INFO, "Uploader", "Saving new hubSettings_backup.json\n");
+                File.Copy(hubPath, backupHubPath, true);
+            }
+            logger.Log(mLogger.LogLevel.INFO, "Uploader", "Saving new hubSettings.json\n");
+            ClusterProfile? profile = Settings.All.ClusterProfiles.FirstOrDefault(p => p.profileName == Settings.All.ClusterProfileToUse);
+            if (profile != null)
+                Settings.SaveHubSettings(_hub, profile, hubPath);
+            else
+            {
+                logger.Log(mLogger.LogLevel.ERROR, "Uploader", "Could not find correct culster profile.  Check 'ManagerSettings.json'");
+                return;
+            }
 
+            foreach (Device node in _nodes)
+            {
+                if (node.ClusterID == _hub.ClusterID)
+                {
+                    string nodePath = Settings.All.SourceFilesDirectory + $"{node.Name}Settings.json";
+                    string backupNodePath = Settings.All.SourceFilesDirectory + $"{node.Name}Settings_backup.json";
+                    if (File.Exists(nodePath))
+                    {
+                        logger.Log(mLogger.LogLevel.INFO, "Uploader", $"Saving new {node.Name}Settings_backup.json\n");
+                        File.Copy(nodePath, backupNodePath, true);
+                    }
+
+                    logger.Log(mLogger.LogLevel.INFO, "Uploader", $"Saving new {node.Name}Settings.json\n");
+                    Settings.SaveNodeSettings(node, Settings.All.ClusterProfiles.FirstOrDefault(p => p.profileName == Settings.All.ClusterProfileToUse), nodePath);
+                }
+            }
+            logger.Log(mLogger.LogLevel.INFO, "Uploader", "Settings files creation complete.\n");
+        }
         public void DistributeRuntimeFiles()
         {
             //  Copy Hub's settings file
@@ -774,15 +804,5 @@ namespace Dplus_Desktop
                 logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", "Error: " + ex.Message + '\n');
             }
         }
-    }
-
-    public enum DeviceStatus
-    {
-        Active = 0,
-        Activating = 1,
-        Deactivating = 2,
-        Inactive = 3,
-        Failed = 4,
-        Error = 5
     }
 }

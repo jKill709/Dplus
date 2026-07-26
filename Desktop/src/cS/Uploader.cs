@@ -52,13 +52,7 @@ namespace Dplus_Desktop
                 currentCluster.CheckSSH(true);
             }
 
-            UpdateManagedFilesBoxes();
-        }
-        private void Uploader_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            //SaveManagedFiles();
-
-            logger.LogHeading(LogLevel.INFO, "Uploader", "Uploader Exiting");
+            UpdateManagedFiles_Box();
         }
 
         private void AddLogSource(string source, Color color = default, bool andModules = true)
@@ -66,79 +60,6 @@ namespace Dplus_Desktop
             logger.AddSource(source, color, andModules);
             logger.Log(mLogger.LogLevel.INFO, "Uploader", $"Added source '{source}' to _tbSink");
         }
-        //private void SaveManagedFiles()
-        //{
-        //    SaveSourceFiles();
-        //    SaveModelFiles();
-        //}
-        //private void SaveSourceFiles()
-        //{
-        //    try
-        //    {
-        //        foreach (ListViewItem item in SourceFiles_Box.Items)
-        //        {
-        //            if (item.SubItems.Count < 3)
-        //                continue;
-
-        //            string fileNameOnly = item.SubItems[0].Text.Trim();  // now just FileName
-        //            string lastUpload = item.SubItems[1].Text.Trim();
-        //            string lastModified = item.SubItems[2].Text.Trim();
-
-        //            foreach (SourceFile val in Settings.All.SourceFiles)
-        //            {
-        //                if (val.FileName == fileNameOnly)
-        //                {
-        //                    if (DateTime.TryParse(lastUpload, out var parsedUpload))
-        //                        val.LastUploadTime = parsedUpload;
-        //                    // lastModified is calculated dynamically, not persisted to JSON
-        //                    break;
-        //                }
-        //            }
-        //        }
-
-        //        Settings.SaveSettings();
-        //        logger.Log(LogLevel.INFO, "Uploader", "Source files saved successfully.\n");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        MessageBox.Show("Error saving file: " + ex.Message);
-        //        logger.Log(LogLevel.ERROR, "Uploader", "Error saving file: " + ex.Message + '\n');
-        //    }
-        //}
-        //private void SaveModelFiles()
-        //{
-        //    try
-        //    {
-        //        foreach (ListViewItem item in ModelFiles_Box.Items)
-        //        {
-        //            if (item.SubItems.Count < 2)
-        //                continue;
-
-        //            string modelName = item.SubItems[0].Text.Trim();
-        //            string modelType = item.SubItems[1].Text.Trim();
-        //            // LastModified is calculated dynamically, not persisted
-
-        //            foreach (ModelFile val in Settings.All.Models)
-        //            {
-        //                if (val.ModelName == modelName && val.ModelType == modelType)
-        //                {
-        //                    // Currently no LastUploadTime in schema for models
-        //                    // If you decide to track uploads later, you'd add it here
-        //                    break;
-        //                }
-        //            }
-        //        }
-
-        //        Settings.SaveSettings();
-        //        logger.Log(LogLevel.INFO, "Uploader", "Model files saved successfully.\n");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        MessageBox.Show("Error saving file: " + ex.Message);
-        //        logger.Log(LogLevel.ERROR, "Uploader", "Error saving file: " + ex.Message + '\n');
-        //    }
-        //}
-
         private void LoadNodes()
         {
             logger.Log(LogLevel.INFO, "Uploader", "Loading nodes for " + Clusters_Box.SelectedItem.ToString() + "\n");
@@ -154,7 +75,7 @@ namespace Dplus_Desktop
 
             HighlightNodes();
         }
-        private void UpdateManagedFilesBoxes()
+        private void UpdateManagedFiles_Box()
         {
             if (Settings.isLoaded == false)
             {
@@ -260,6 +181,7 @@ namespace Dplus_Desktop
                 item.SubItems.Add(lastSourceChange);
                 item.SubItems.Add(lastCompiledTimeString);
                 item.SubItems.Add(pushedTimeString);
+                item.BackColor = color;
                 item.UseItemStyleForSubItems = true;
                 RuntimeFiles_Box.Items.Add(item);
             }
@@ -295,16 +217,13 @@ namespace Dplus_Desktop
                 item.SubItems.Add(file.ModelType);
                 item.SubItems.Add(lastPushTime);
                 item.SubItems.Add(lastModifiedTime);
+                item.BackColor = color;
                 item.UseItemStyleForSubItems = true;
 
                 ModelFiles_Box.Items.Add(item);
             }
         }
 
-        private void Reselect_Button_Click(object sender, EventArgs e)
-        {
-            UpdateManagedFilesBoxes();
-        }
         private void HighlightNodes()
         {
             foreach (ListViewItem nodeItem in Nodes_Box.Items)
@@ -363,16 +282,14 @@ namespace Dplus_Desktop
                 //}
             }
         }
-        private void CheckServiceStatus_Button_Click(object sender, EventArgs e)
-        {
-            checkServiceStatus(currentCluster);
-        }
         private void checkServiceStatus(ClusterManager com)
         {
+            setGUISSHStatus(com.CheckSSH(true));
+
             string hubServiceName = "hub.service";
             string nodeServiceName = "node.service";
-            ServiceStatus hubResult;
-                logger.Log(LogLevel.INFO, "Uploader", $"Checking status of {hubServiceName}...\n");
+            ServiceStatus hubResult = ServiceStatus.Error;
+            logger.Log(LogLevel.INFO, "Uploader", $"Checking status of {hubServiceName}...\n");
 
             // Run systemctl command to get status
             try
@@ -500,13 +417,6 @@ namespace Dplus_Desktop
                     break;
             }
         }
-
-        private void Connect_Click(object sender, EventArgs e)
-        {
-            currentCluster.CheckSSH(true);
-            UpdateManagedFilesBoxes();
-        }
-
         private void setGUISSHStatus(bool isConnected)
         {
             Color color = isConnected ? Color.Green : Color.Red;
@@ -531,9 +441,29 @@ namespace Dplus_Desktop
             }
         }
 
+        #region WinformEventHandlers
+        private void Uploader_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            //SaveManagedFiles();
+
+            logger.LogHeading(LogLevel.INFO, "Uploader", "Uploader Exiting");
+        }
+        private void Reselect_Button_Click(object sender, EventArgs e)
+        {
+            UpdateManagedFiles_Box();
+        }
+        private void CheckServiceStatus_Button_Click(object sender, EventArgs e)
+        {
+            checkServiceStatus(currentCluster);
+        }
+        private void Connect_Click(object sender, EventArgs e)
+        {
+            currentCluster.CheckSSH(true);
+            UpdateManagedFiles_Box();
+        }
         private void Upload_Button_Click(object sender, EventArgs e)
         {
-            UpdateManagedFilesBoxes();
+            UpdateManagedFiles_Box();
 
             try
             {
@@ -545,9 +475,6 @@ namespace Dplus_Desktop
                 // Upload files
                 currentCluster.UploadFiles();
 
-
-                logger.Log(LogLevel.INFO, "Uploader", "Saving Data\n");
-                //SaveManagedFiles();
                 logger.Log(LogLevel.INFO, "Uploader", "Upload process completed.\n");
             }
             catch (Exception ex)
@@ -556,16 +483,13 @@ namespace Dplus_Desktop
                 logger.Log(LogLevel.INFO, "Uploader", "Upload Failed.\n");
             }
         }
-
         private void DownloadFiles_Button_Click(object sender, EventArgs e)
         {
             currentCluster.DownloadFiles();
         }
-
         private void ManualRecompile_Button_Click(object sender, EventArgs e)
         {
             currentCluster.ManualRecompile();
-            //currentCluster.testFileMethods(Settings.All.SourceFilesDirectory + "file.txt", Settings.All.Nodes[0].APAddress, Settings.All.Nodes[0].Username);
         }
         private void AutoRecompile_Button1_Click(object sender, EventArgs e)
         {
@@ -573,24 +497,20 @@ namespace Dplus_Desktop
 
             currentCluster.DistributeRuntimeFiles();
         }
-
         private void DistributeRuntimeFiles_Button_Click(object sender, EventArgs e)
         {
             currentCluster.DistributeRuntimeFiles();
-        }
-        
+        }        
         private void RunMain_Button_Click(object sender, EventArgs e)
         {
             currentCluster.startMain();
         }
-
         private void StopService_Button_Click(object sender, EventArgs e)
         {
             currentCluster.stopMain();
 
             currentCluster.DownloadFiles();
         }
-
         private void Reboot_Button_Click(object sender, EventArgs e)
         {
             currentCluster.RebootCluster();
@@ -599,48 +519,16 @@ namespace Dplus_Desktop
         {
             currentCluster.ShutdownCluster();
         }
-
         private void Clusters_Box_SelectedIndexChanged(object sender, EventArgs e)
         {
             currentCluster = clusters[Clusters_Box.Text];
 
             LoadNodes();
         }
-
         private void CreateSettingsfiles_Button_Click(object sender, EventArgs e)
         {
-            logger.Log(LogLevel.INFO, "Uploader", "Creating new settings files...\n");
-            string hubPath = Settings.All.SourceFilesDirectory + "hubSettings.json";
-            string backupHubPath = Settings.All.SourceFilesDirectory + "hubSettings_backup.json";
-            if (File.Exists(hubPath))
-            {
-                logger.Log(LogLevel.INFO, "Uploader", "Saving new hubSettings_backup.json\n");
-                File.Copy(hubPath, backupHubPath, true);
-            }
-            logger.Log(LogLevel.INFO, "Uploader", "Saving new hubSettings.json\n");
-            Settings.SaveHubSettings(Settings.All.Hubs[Clusters_Box.SelectedIndex], Settings.All.ClusterProfiles.FirstOrDefault(p => p.profileName == Settings.All.ClusterProfileToUse), hubPath);
-
-
-            foreach (Device node in Settings.All.Nodes)
-            {
-                if (node.ClusterID == Settings.All.Hubs[Clusters_Box.SelectedIndex].ClusterID)
-                {
-                    string nodePath = Settings.All.SourceFilesDirectory + $"{node.Name}Settings.json";
-                    string backupNodePath = Settings.All.SourceFilesDirectory + $"{node.Name}Settings_backup.json";
-                    if (File.Exists(nodePath))
-                    {
-                        logger.Log(LogLevel.INFO, "Uploader", $"Saving new {node.Name}Settings_backup.json\n");
-                        File.Copy(nodePath, backupNodePath, true);
-                    }
-
-                    logger.Log(LogLevel.INFO, "Uploader", $"Saving new {node.Name}Settings.json\n");
-                    Settings.SaveNodeSettings(node, Settings.All.ClusterProfiles.FirstOrDefault(p => p.profileName == Settings.All.ClusterProfileToUse), nodePath);
-                }
-            }
-            logger.Log(LogLevel.INFO, "Uploader", "Settings files creation complete.\n");
-
-
+            currentCluster.CreateSettingsFiles();
         }
-
+        #endregion
     }
 }
