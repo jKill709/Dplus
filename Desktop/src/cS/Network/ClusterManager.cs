@@ -4,6 +4,7 @@ using jCommunicator;
 using Microsoft.Extensions.Logging;
 using mLogger;
 using System.Text.RegularExpressions;
+using static OpenCvSharp.ML.DTrees;
 
 namespace Dplus_Desktop
 {
@@ -41,7 +42,7 @@ namespace Dplus_Desktop
             //checkSSHDevice(currentCluster, true);
         }
 
-        public bool CheckSSH(bool verbose)
+        public bool CheckSSH(bool verbose = false)
         {
             string host = _hubCom._host;
             string username = _hubCom._username;
@@ -91,9 +92,9 @@ namespace Dplus_Desktop
 
             return isCnctd;
         }
-        public ServiceStatus CheckDeviceServiceStatus(string nodeName)
+        public ServiceStatus CheckDeviceServiceStatus(string deviceName)
         {
-            Device? device = Settings.All.GetDeviceByName(nodeName);
+            Device? device = Settings.All.GetDeviceByName(deviceName);
             if (device == null)
                 return ServiceStatus.Error; 
             return CheckDeviceServiceStatus(device);
@@ -671,41 +672,43 @@ namespace Dplus_Desktop
             return !hadErrors;
         }
 
-        public void ManualRecompile()
+        private void BackupBinFiles()
         {
-            stopMain();
-
-            //currentCluster.DeleteFile("/home/camcpp/previous_node_d");
-            //currentCluster.MoveFile("/home/camcpp/device", "/home/camcpp/previous_node_d");
-            //currentCluster.ExecuteCommand("g++ -o device -g /home/camcpp/src/*.cpp $(pkg-config --cflags --libs opencv4) -lgpiod -lonnxruntime -I/usr/local/include"); // debug
-
+            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Backuping up previous bin files");
             _hubCom.DeleteHubFile("/home/camcpp/previous_hub");
             _hubCom.MoveHubFile("/home/camcpp/hub", "/home/camcpp/previous_hub");
             _hubCom.DeleteHubFile("/home/camcpp/previous_node");
-            _hubCom.MoveHubFile("/home/camcpp/device", "/home/camcpp/previous_node");
+            _hubCom.MoveHubFile("/home/camcpp/node", "/home/camcpp/previous_node");
+            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Bin files backed up");
+        }
+        public void ManualRecompile(bool backupFirst)
+        {
+            stopMain();
+
+            if (backupFirst)
+                BackupBinFiles();
 
             logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Ready to recompile manually.  Please Run:\n");
             logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "time make -C /home/camcpp/build\n");
         }
-        public void AutoRecompile()
+        public void AutoRecompile(bool backupFirst)
         {
             stopMain();
 
-            //currentCluster.DeleteFile("/home/camcpp/previous_node_d");
-            //currentCluster.MoveFile("/home/camcpp/device", "/home/camcpp/previous_node_d");
+            if (backupFirst)
+                BackupBinFiles();
+
             //currentCluster.ExecuteCommand("g++ -o device -g /home/camcpp/src/*.cpp $(pkg-config --cflags --libs opencv4) -lgpiod -lonnxruntime -I/usr/local/include"); // debug
-
-            _hubCom.DeleteHubFile("/home/camcpp/previous_hub");
-            _hubCom.MoveHubFile("/home/camcpp/hub", "/home/camcpp/previous_hub");
-            _hubCom.DeleteHubFile("/home/camcpp/previous_node");
-            _hubCom.MoveHubFile("/home/camcpp/device", "/home/camcpp/previous_node");
-
             //currentCluster.ExecuteHubCommand("g++ -O2 -o device  /home/camcpp/src/*.cpp $(pkg-config --cflags --libs opencv4) -lgpiod -lonnxruntime -I/usr/local/include");    // release
+
+            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Recompiling...");
             _hubCom.ExecuteHubCommand("make -C /home/camcpp/build");
+            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Recompilation Complete");
         }
         public void CreateSettingsFiles()
         {
             logger.Log(mLogger.LogLevel.INFO, "Uploader", "Creating new settings files...\n");
+
             string hubPath = Settings.All.SourceFilesDirectory + "hubSettings.json";
             string backupHubPath = Settings.All.SourceFilesDirectory + "hubSettings_backup.json";
             if (File.Exists(hubPath))
@@ -743,6 +746,7 @@ namespace Dplus_Desktop
         }
         public void DistributeRuntimeFiles()
         {
+            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Distributing Runtime files");
             //  Copy Hub's settings file
             string hubSettingsStartingPath = Settings.All.SourceFilesDirectory + "hubSettings.json";
             string hubSettingsEndingPath = "/home/camcpp/src/hubSettings.json";
@@ -758,23 +762,31 @@ namespace Dplus_Desktop
                     _hubCom.CopyHubToNode(nodeBinFile, nodeBinFile, node.APAddress, node.Username);
                     _hubCom.CopyPCtoNode(nodeSettingsStartingPath, nodeSettingsEndingPath, node.APAddress, false);
                 }
+
+            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Runtime File Distribution Complete");
         }
 
         public void startMain()
         {
             _hubCom.ExecuteHubCommand("sudo systemctl start hub.service");
-
+            logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Starting {_hub.Name}:hub.service");
+        
             foreach (Device node in _nodes)
             {
-                _hubCom.ExecuteNodeCommand($"sudo systemctl start device.service", node.APAddress, node.Username);
+                _hubCom.ExecuteNodeCommand($"sudo systemctl start node.service", node.APAddress, node.Username);
+                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Starting {node.Name}:node.service");
             }
         }
         public void stopMain()
         {
             _hubCom.ExecuteHubCommand("sudo systemctl stop hub.service");
+            logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Stopping {_hub.Name}:hub.service");
 
             foreach (Device node in _nodes)
-                _hubCom.ExecuteNodeCommand($"sudo systemctl stop device.service", node.APAddress, node.Username);
+            {
+                _hubCom.ExecuteNodeCommand($"sudo systemctl stop node.service", node.APAddress, node.Username);
+                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Stopping {node.Name}:node.service");
+            }
         }
 
         public void RebootCluster()
@@ -783,14 +795,19 @@ namespace Dplus_Desktop
             {
                 // Reboot each Node
                 foreach (Device node in _nodes)
+                {
                     _hubCom.ExecuteHubCommand($"nohup ssh -tt {node.Username}@{node.APAddress} \"sudo shutdown -r +1\" > /dev/null 2>&1 &");
+                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"{node.Name} at {node.APAddress} is rebooting.");
+                }
+
                 _hubCom.ExecuteHubCommand("sudo shutdown -r now");
+                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"{_hub.Name} is rebooting.");
 
                 _hubCom.Disconnect();
             }
             catch (Exception ex)
             {
-                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", "Error: " + ex.Message + '\n');
+                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", "Error: " + ex.Message);
             }
         }
         public void ShutdownCluster()
@@ -799,15 +816,21 @@ namespace Dplus_Desktop
             {
                 // Shutdown each Node
                 foreach (Device node in _nodes)
+                {
                     _hubCom.ExecuteHubCommand($"nohup ssh -tt {node.Username}@{node.APAddress} \"sudo shutdown now\" > /dev/null 2>&1 &");
+                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"{node.Name} at {node.APAddress} is shutting down.");
+                }
                     
                 _hubCom.ExecuteHubCommand("sudo shutdown now");
+                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"{_hub.Name} is shutting down.");
 
                 _hubCom.Disconnect();
             }
             catch (Exception ex)
             {
-                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", "Error: " + ex.Message + '\n');
+                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", "Error Message:   " + ex.Message);
+                if (ex.InnerException != null)
+                    logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", "Inner Ex:        " + ex.InnerException.Message);
             }
         }
     }
