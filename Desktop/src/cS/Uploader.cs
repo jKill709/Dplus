@@ -52,7 +52,7 @@ namespace Dplus_Desktop
                 currentCluster.CheckSSH(true);
             }
 
-            UpdateManagedFiles_Box();
+            UpdateManagedFiles_Boxes();
         }
 
         private void AddLogSource(string source, Color color = default, bool andModules = true)
@@ -75,7 +75,7 @@ namespace Dplus_Desktop
 
             HighlightNodes();
         }
-        private void UpdateManagedFiles_Box()
+        private void UpdateManagedFiles_Boxes()
         {
             if (Settings.isLoaded == false)
             {
@@ -450,7 +450,7 @@ namespace Dplus_Desktop
         }
         private void Reselect_Button_Click(object sender, EventArgs e)
         {
-            UpdateManagedFiles_Box();
+            UpdateManagedFiles_Boxes();
         }
         private void CheckServiceStatus_Button_Click(object sender, EventArgs e)
         {
@@ -459,12 +459,10 @@ namespace Dplus_Desktop
         private void Connect_Click(object sender, EventArgs e)
         {
             currentCluster.CheckSSH(true);
-            UpdateManagedFiles_Box();
+            UpdateManagedFiles_Boxes();
         }
         private void Upload_Button_Click(object sender, EventArgs e)
         {
-            UpdateManagedFiles_Box();
-
             try
             {
                 logger.Log(LogLevel.INFO, "Uploader", "Starting Upload Process.\n");
@@ -474,6 +472,9 @@ namespace Dplus_Desktop
 
                 // Upload files
                 currentCluster.UploadFiles();
+
+                // Show new status in GUI
+                UpdateManagedFiles_Boxes();
 
                 logger.Log(LogLevel.INFO, "Uploader", "Upload process completed.\n");
             }

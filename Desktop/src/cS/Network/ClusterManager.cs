@@ -291,33 +291,33 @@ namespace Dplus_Desktop
 
             foreach (SourceFile file in Settings.All.SourceFiles)
             {
-                string localFile = Path.Combine(Settings.All.SourceFilesDirectory, file.FileName);
-                string remoteHubFile = Path.Combine(Settings.All.UploadDirectory, "_hub/", file.FileName)
-                                       .Replace("\\", "/"); // normalize to Linux paths
-                string remoteNodeFile = Path.Combine(Settings.All.UploadDirectory, "device/", file.FileName)
-                                       .Replace("\\", "/"); // normalize to Linux paths
-
-                if (file.IsForHub)
+                if (file.LastModifiedTime > file.LastUploadTime)
                 {
-                    // Delete old file
-                    _hubCom.DeleteHubFile(remoteHubFile);
+                    string localFile = Path.Combine(Settings.All.SourceFilesDirectory, file.FileName);
+                    string remoteHubFile = Path.Combine(Settings.All.UploadDirectory, "hub/", file.FileName).Replace("\\", "/"); // normalize to Linux paths
+                    string remoteNodeFile = Path.Combine(Settings.All.UploadDirectory, "node/", file.FileName).Replace("\\", "/"); // normalize to Linux paths
 
-                    // Upload new file
-                    _hubCom.CopyPCtoHub(localFile, remoteHubFile);
+                    if (file.IsForHub)
+                    {
+                        // Delete old file
+                        _hubCom.DeleteHubFile(remoteHubFile);
+
+                        // Upload new file
+                        _hubCom.CopyPCtoHub(localFile, remoteHubFile);
+                    }
+                    if (file.IsForNode)
+                    {
+                        // Delete old file
+                        _hubCom.DeleteHubFile(remoteNodeFile);
+
+                        // Upload new file
+                        _hubCom.CopyPCtoHub(localFile, remoteNodeFile);
+                    }
+
+                    // Update settings
+                    DateTime now = DateTime.Now;
+                    file.LastUploadTime = now; // LastUploadTime column
                 }
-                if (file.IsForNode)
-                {
-                    // Delete old file
-                    _hubCom.DeleteHubFile(remoteNodeFile);
-
-                    // Upload new file
-                    _hubCom.CopyPCtoHub(localFile, remoteNodeFile);
-                }
-
-                // Update settings
-                DateTime now = DateTime.Now;
-                file.LastUploadTime = now; // LastUploadTime column
-
             }
 
             Settings.SaveSettings();
@@ -326,24 +326,30 @@ namespace Dplus_Desktop
         {
             foreach (ModelFile file in Settings.All.Models)
             {
-                string localFile = Path.Combine(Settings.All.LocalModelsPath, file.ModelType, file.ModelName);
-
-                // Try uploading to currentCluster
-                string remoteFile = Path.Combine(Settings.All.RemoteModelsPath, file.ModelType, file.ModelName).Replace("\\", "/");
-
-                try
+                if (file.LastModifiedTime > file.LastPushTime)
                 {
-                    _hubCom.CopyPCtoHub(localFile, remoteFile);
-                    foreach (Device node in _nodes)
+                    string localFile = Path.Combine(Settings.All.LocalModelsPath, file.ModelType, file.ModelName);
+
+                    // Try uploading to currentCluster
+                    string remoteFile = Path.Combine(Settings.All.RemoteModelsPath, file.ModelType, file.ModelName).Replace("\\", "/");
+
+                    try
                     {
-                        _hubCom.CopyHubToNode(remoteFile, remoteFile, node.APAddress, node.Username);
+                        _hubCom.DeleteHubFile(remoteFile);
+                        _hubCom.CopyPCtoHub(localFile, remoteFile);
+                        foreach (Device node in _nodes)
+                        {
+                            _hubCom.DeleteNodeFile(remoteFile, node.APAddress);
+                            _hubCom.CopyHubToNode(remoteFile, remoteFile, node.APAddress, node.Username);
+                        }
+                        logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Uploaded '{localFile}' → '{remoteFile}' to all nodes");
                     }
-                }
-                catch (Exception ex)
-                {
-                    logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Upload failed for {file.ModelName} on device {_hubCom._host}: {ex.Message}\n");
-                }
-            }
+                    catch (Exception ex)
+                    {
+                        logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Upload failed for {file.ModelName} on device {_hubCom._host}: {ex.Message}\n");
+                    }
+
+                }            }
 
             Settings.SaveSettings();
         }

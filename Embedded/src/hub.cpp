@@ -20,7 +20,7 @@
 #include "roomViewer.h"
 #include "stopwatch.h"
 
-//const int RemoveMeImUsless = 1; // Placeholder to force recompilation of this file
+const int RemoveMeImUsless = 1; // Placeholder to force reupload/recompilation of this file
 
 
 std::atomic<bool> running{ true };
