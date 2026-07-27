@@ -117,14 +117,18 @@ namespace Dplus_Desktop
                 {
                     if (file.LastModifiedTime.HasValue)
                     {
-                        if (file.LastModifiedTime > file.LastUploadTime)
-                            color = Color.Yellow;       // Needs Upload
+                        if (file.LastModifiedTime == DateTime.MinValue)
+                            color = Color.Red;          // Local copy missing
+                        if (file.LastUploadTime == DateTime.MinValue)
+                            color = Color.Orange;       // Hub copy missing
+                        else if (file.LastModifiedTime > file.LastUploadTime)
+                            color = Color.Yellow;       // Needs upload to update
                         else
                             color = Color.Green;        // Good to go
                     }
                     else
                     {
-                        color = Color.Red;              // No last modified (file likley missing)
+                        color = Color.DarkRed;          // No last modified (file likley missing)
                     }
                 }
                 catch
@@ -162,7 +166,7 @@ namespace Dplus_Desktop
                 // Determine color
                 Color color = Color.Black;
 
-                if (file.LastSourceChangeTime.HasValue && file.LastCompliedTime.HasValue && file.LastPushedTime.HasValue)
+                if ((file.LastSourceChangeTime.HasValue && file.LastSourceChangeTime > DateTime.MinValue) && (file.LastCompliedTime.HasValue && file.LastCompliedTime > DateTime.MinValue) && (file.LastPushedTime.HasValue && file.LastPushedTime > DateTime.MinValue))
                 {
                     if (file.LastSourceChangeTime > file.LastCompliedTime)
                         color = Color.Yellow;       // Needs to be compiled
@@ -202,14 +206,18 @@ namespace Dplus_Desktop
 
                 if (file.LastModifiedTime.HasValue && file.LastPushTime.HasValue)
                 {
-                    if (file.LastModifiedTime > file.LastPushTime)
+                    if (file.LastModifiedTime == DateTime.MinValue)
+                        color = Color.DarkRed;
+                    else if (file.LastPushTime == DateTime.MinValue)
+                        color = Color.Red;          // No last modified and/or pushed time (file likeley missing)
+                    else if (file.LastModifiedTime > file.LastPushTime)
                         color = Color.Yellow;       // Needs to be compiled
                     else
                         color = Color.Green;        // Good to go
                 }
                 else
                 {
-                    color = Color.Red;              // No last modified and/or pushed time (file likeley missing)
+                    color = Color.DarkRed;              // No last modified and/or pushed time (file likeley missing)
                 }
 
                 // Create a new ListViewItem with file name, type, last modified
@@ -273,7 +281,7 @@ namespace Dplus_Desktop
                     color = Color.DarkRed;
                     logger.Log(LogLevel.ERROR, "Uploader", $"Device not found in Settings.All.Nodes for name '{nodeItem.SubItems[0].Text}'.\n");
                 }
-                
+
                 // set color for entire row
                 nodeItem.BackColor = color;
                 //foreach (ListViewItem.ListViewSubItem sub in nodeItem.SubItems)
@@ -314,7 +322,7 @@ namespace Dplus_Desktop
                             case ServiceStatus.Activating:
                                 node.BackColor = Color.Green;
                                 break;
-                        
+
                             case ServiceStatus.Failed:
                                 node.BackColor = Color.Red;
                                 break;
@@ -490,18 +498,20 @@ namespace Dplus_Desktop
         }
         private void ManualRecompile_Button_Click(object sender, EventArgs e)
         {
-            currentCluster.ManualRecompile();
+            currentCluster.ManualRecompile(BackupFirst_Box.Checked);
         }
         private void AutoRecompile_Button1_Click(object sender, EventArgs e)
         {
-            currentCluster.AutoRecompile();
 
+            currentCluster.AutoRecompile(BackupFirst_Box.Checked);
             currentCluster.DistributeRuntimeFiles();
+
+            UpdateManagedFiles_Boxes();
         }
         private void DistributeRuntimeFiles_Button_Click(object sender, EventArgs e)
         {
             currentCluster.DistributeRuntimeFiles();
-        }        
+        }
         private void RunMain_Button_Click(object sender, EventArgs e)
         {
             currentCluster.startMain();
@@ -530,6 +540,7 @@ namespace Dplus_Desktop
         {
             currentCluster.CreateSettingsFiles();
         }
+
         #endregion
     }
 }

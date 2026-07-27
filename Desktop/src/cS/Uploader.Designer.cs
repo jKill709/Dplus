@@ -77,6 +77,7 @@
             IPAddress = new ColumnHeader();
             columnHeader5 = new ColumnHeader();
             columnHeader6 = new ColumnHeader();
+            BackupFirst_Box = new CheckBox();
             SystemCTLService_GroupBox.SuspendLayout();
             SourceCode_GroupBox.SuspendLayout();
             RaspberryPi_GroupBox.SuspendLayout();
@@ -236,6 +237,7 @@
             // 
             // SourceCode_GroupBox
             // 
+            SourceCode_GroupBox.Controls.Add(BackupFirst_Box);
             SourceCode_GroupBox.Controls.Add(AutoRecompile_Button1);
             SourceCode_GroupBox.Controls.Add(CreateJSONfiles_Button);
             SourceCode_GroupBox.Controls.Add(DistributeRuntimeFiles_Button);
@@ -505,6 +507,16 @@
             columnHeader6.Text = "Last Modified";
             columnHeader6.Width = 175;
             // 
+            // BackupFirst_Box
+            // 
+            BackupFirst_Box.AutoSize = true;
+            BackupFirst_Box.Location = new Point(168, 51);
+            BackupFirst_Box.Name = "BackupFirst_Box";
+            BackupFirst_Box.Size = new Size(65, 19);
+            BackupFirst_Box.TabIndex = 13;
+            BackupFirst_Box.Text = "Backup";
+            BackupFirst_Box.UseVisualStyleBackColor = true;
+            // 
             // Uploader
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -525,6 +537,7 @@
             FormClosing += Uploader_FormClosing;
             SystemCTLService_GroupBox.ResumeLayout(false);
             SourceCode_GroupBox.ResumeLayout(false);
+            SourceCode_GroupBox.PerformLayout();
             RaspberryPi_GroupBox.ResumeLayout(false);
             SSHSCP_GroupBox.ResumeLayout(false);
             Controls_GroupBox.ResumeLayout(false);
@@ -588,5 +601,6 @@
         private Label Status_Connction_Label;
         private Button CreateJSONfiles_Button;
         private Button AutoRecompile_Button1;
+        private CheckBox BackupFirst_Box;
     }
 }
