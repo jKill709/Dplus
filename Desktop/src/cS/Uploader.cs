@@ -282,12 +282,7 @@ namespace Dplus_Desktop
                     logger.Log(LogLevel.ERROR, "Uploader", $"Device not found in Settings.All.Nodes for name '{nodeItem.SubItems[0].Text}'.\n");
                 }
 
-                // set color for entire row
                 nodeItem.BackColor = color;
-                //foreach (ListViewItem.ListViewSubItem sub in nodeItem.SubItems)
-                //{
-                //    sub.BackColor = color;
-                //}
             }
         }
         private void checkServiceStatus(ClusterManager com)

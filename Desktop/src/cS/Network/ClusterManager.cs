@@ -67,7 +67,7 @@ namespace Dplus_Desktop
             string username = _hubCom._username;
 
             if (verbose)
-                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Checking SSH connection to device {host} as {username}...\n");
+                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Checking SSH connection to device {host} as {username}...");
 
             var sw = System.Diagnostics.Stopwatch.StartNew();
             bool isCnctd = false;
@@ -77,36 +77,36 @@ namespace Dplus_Desktop
                 if (_hubCom.Connect())
                 {
                     if (verbose)
-                        logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Successfully connected to {host} in {sw.ElapsedMilliseconds} ms.\n");
+                        logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Successfully connected to {host} in {sw.ElapsedMilliseconds} ms.");
                     isCnctd = true;
                 }
                 else
                 {
-                    logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Failed to connect to {host} without error.\n");
+                    logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Failed to connect to {host} without error.");
                 }
             }
             catch (Renci.SshNet.Common.SshAuthenticationException authEx)
             {
-                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Authentication failed for {username}@{host}: {authEx.Message}\n");
+                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Authentication failed for {username}@{host}: {authEx.Message}");
             }
             catch (Renci.SshNet.Common.SshConnectionException connEx)
             {
-                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Connection error to {host}: {connEx.Message}\n");
+                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Connection error to {host}: {connEx.Message}");
             }
             catch (System.Net.Sockets.SocketException sockEx)
             {
-                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Socket error while connecting to {host}: {sockEx.Message}\n");
+                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Socket error while connecting to {host}: {sockEx.Message}");
             }
             catch (Exception ex)
             {
-                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Unexpected error for {host}: {ex.GetType().Name} - {ex.Message}\n");
+                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Unexpected error for {host}: {ex.GetType().Name} - {ex.Message}");
             }
             finally
             {
                 sw.Stop();
 
                 if (verbose)
-                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Total connection attempt time for {host}: {sw.ElapsedMilliseconds} ms.\n");
+                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Total connection attempt time for {host}: {sw.ElapsedMilliseconds} ms.");
             }
 
             return isCnctd;
@@ -151,9 +151,9 @@ namespace Dplus_Desktop
                 }
                 catch (Exception ex)
                 {
-                    logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Error checking service status on device '{device.Name}' ({device.APAddress}): {ex.Message}\n");
+                    logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Error checking service status on device '{device.Name}' ({device.APAddress}): {ex.Message}");
                     if (ex.InnerException != null)
-                        logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Inner exception: {ex.InnerException.Message}\n");
+                        logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Inner exception: {ex.InnerException.Message}");
 
                     result = "failed";
                 }
@@ -176,17 +176,17 @@ namespace Dplus_Desktop
                         return ServiceStatus.Deactivating;
 
                     default:
-                        logger.Log(mLogger.LogLevel.WARN, "ClusterManager", $"Unknown service state '{result}' for device '{device.Name}'.\n");
+                        logger.Log(mLogger.LogLevel.WARN, "ClusterManager", $"Unknown service state '{result}' for device '{device.Name}'.");
                         return ServiceStatus.Error;
                 
                 }
             }
             catch (Exception ex)
             {
-                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Unhandled error while processing device '{device.Name}': {ex.Message}\n");
+                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Unhandled error while processing device '{device.Name}': {ex.Message}");
                 if (ex.InnerException != null)
-                    logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Inner exception: {ex.InnerException.Message}\n");
-                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Stack Trace:\n{ex.StackTrace}\n");
+                    logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Inner exception: {ex.InnerException.Message}");
+                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Stack Trace:{ex.StackTrace}");
                 return ServiceStatus.Error;
             }
         }
@@ -217,6 +217,7 @@ namespace Dplus_Desktop
                     else
                         file.LastUploadTime = DateTime.MinValue;
                 }
+
                 if (File.Exists(filePath))
                     file.LastModifiedTime = File.GetLastWriteTime(filePath);
                 else
@@ -337,8 +338,7 @@ namespace Dplus_Desktop
                     }
 
                     // Update settings
-                    DateTime now = DateTime.Now;
-                    file.LastUploadTime = now; // LastUploadTime column
+                    file.LastUploadTime = DateTime.Now; ; // LastUploadTime column
                 }
             }
 
@@ -364,14 +364,17 @@ namespace Dplus_Desktop
                             _hubCom.DeleteNodeFile(remoteFile, node.APAddress);
                             _hubCom.CopyHubToNode(remoteFile, remoteFile, node.APAddress, node.Username);
                         }
+
+                        file.LastPushTime = DateTime.Now;
                         logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Uploaded '{localFile}' → '{remoteFile}' to all nodes");
                     }
                     catch (Exception ex)
                     {
-                        logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Upload failed for {file.ModelName} on device {_hubCom._host}: {ex.Message}\n");
+                        logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Upload failed for {file.ModelName} on device {_hubCom._host}: {ex.Message}");
                     }
 
-                }            }
+                }            
+            }
 
             Settings.SaveSettings();
         }
@@ -384,7 +387,7 @@ namespace Dplus_Desktop
             }
             catch (Exception ex)
             {
-                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", "Error downloading log files: " + ex.Message + '\n');
+                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", "Error downloading log files: " + ex.Message);
             }
 
             try
@@ -393,7 +396,7 @@ namespace Dplus_Desktop
             }
             catch (Exception ex)
             {
-                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", "Error downloading capture files: " + ex.Message + '\n');
+                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", "Error downloading capture files: " + ex.Message);
             }
 
             try
@@ -402,7 +405,7 @@ namespace Dplus_Desktop
             }
             catch (Exception ex)
             {
-                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", "Error downloading frame files: " + ex.Message + '\n');
+                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", "Error downloading frame files: " + ex.Message);
             }
 
             try
@@ -411,10 +414,10 @@ namespace Dplus_Desktop
             }
             catch (Exception ex)
             {
-                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", "Error downloading calibrationfiles: " + ex.Message + '\n');
+                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", "Error downloading calibrationfiles: " + ex.Message);
             }
 
-            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Download process completed.\n");
+            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Download process completed.");
         }
         private bool DownloadCalibration()
         {
@@ -431,7 +434,7 @@ namespace Dplus_Desktop
             }
             else
             {
-                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"[{_hub.Name}] ⚠ Download failed: {HubCalibrationSettingsFile}\n");
+                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"[{_hub.Name}] ⚠ Download failed: {HubCalibrationSettingsFile}");
                 return false;
             }
         }
@@ -447,11 +450,11 @@ namespace Dplus_Desktop
 
                 if (remoteFiles.Length == 0)
                 {
-                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"No .log files found on {_hub.Name}.\n");
+                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"No .log files found on {_hub.Name}.");
                 }
                 else
                 {
-                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Found {remoteFiles.Length} .log files on {_hub.Name}.\n");
+                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Found {remoteFiles.Length} .log files on {_hub.Name}.");
 
                     foreach (string remoteFilePath in remoteFiles)
                     {
@@ -462,27 +465,27 @@ namespace Dplus_Desktop
                         string fileName = Path.GetFileName(remoteFilePath.Trim());
                         string localFilePath = Path.Combine(baseLocalHubLogDir, fileName);
 
-                        //OutputText($"[{_hub.Name}] Downloading {remoteFilePath} → {localFilePath}\n", LogLevel.INFO);
+                        //OutputText($"[{_hub.Name}] Downloading {remoteFilePath} → {localFilePath}", LogLevel.INFO);
                         if (_hubCom.CopyHubToPC(remoteFilePath.Trim(), localFilePath, false))
                         {
                             var info = new FileInfo(localFilePath);
-                            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"[{_hub.Name}] ✔ Successfully downloaded: {localFilePath} ({info.Length} bytes)\n");
+                            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"[{_hub.Name}] ✔ Successfully downloaded: {localFilePath} ({info.Length} bytes)");
                             if (!(GetDateFromLogFilename(fileName) == DateTime.Today))
                             {
                                 if (_hubCom.DeleteHubFile(remoteFilePath.Trim(), false))
                                 {
-                                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"[{_hub.Name}] 🗑 Deleted remote log file: {remoteFilePath}\n");
+                                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"[{_hub.Name}] 🗑 Deleted remote log file: {remoteFilePath}");
                                 }
                                 else
                                 {
-                                    logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"[{_hub.Name}] ⚠ Successfully downloaded, but could not delete remote log file: {remoteFilePath}\n");
+                                    logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"[{_hub.Name}] ⚠ Successfully downloaded, but could not delete remote log file: {remoteFilePath}");
                                     hadErrors = true;
                                 }
                             }
                         }
                         else
                         {
-                            logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"[{_hub.Name}] ⚠ Download failed: {localFilePath}\n");
+                            logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"[{_hub.Name}] ⚠ Download failed: {localFilePath}");
                             hadErrors = true;
                         }
                     }
@@ -496,50 +499,43 @@ namespace Dplus_Desktop
                 if (!Directory.Exists(deviceLocalLogDir))
                     Directory.CreateDirectory(deviceLocalLogDir);
 
-                //OutputText($"Checking logs on {device.Name} ({device.APAddress})...\n", LogLevel.INFO);
-
-                // Ask remote system for a list of .log files
-                //string cmd = $"ls -1 {remoteLogDir}*.log 2>/dev/null";
-                //string result = _hubCom.ExecuteNodeCommand(cmd, device.APAddress, device.Username);
-                //result.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-
                 string[] remoteFiles = _hubCom.GetListOfNodeFiles(remoteLogDir, "log", node.APAddress, node.Username);
 
                 if (remoteFiles.Length == 0)
                 {
-                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"No .log files found on {node.Name}.\n");
+                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"No .log files found on {node.Name}.");
                     continue;
                 }
                 else
                 {
-                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Found {remoteFiles.Length} .log files on {node.Name}.\n");
+                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Found {remoteFiles.Length} .log files on {node.Name}.");
 
                     foreach (string remoteFilePath in remoteFiles)
                     {
                         string fileName = Path.GetFileName(remoteFilePath.Trim());
                         string localFilePath = Path.Combine(deviceLocalLogDir, fileName);
 
-                        //OutputText($"[{device.Name}] Downloading {remoteFilePath} → {localFilePath}\n", LogLevel.INFO);
+                        //OutputText($"[{device.Name}] Downloading {remoteFilePath} → {localFilePath}", LogLevel.INFO);
                         if (_hubCom.CopyNodeToPC(remoteFilePath.Trim(), localFilePath, node.APAddress, false))
                         {
                             var info = new FileInfo(localFilePath);
-                            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"[{node.Name}] ✔ Successfully downloaded: {localFilePath} ({info.Length} bytes)\n");
+                            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"[{node.Name}] ✔ Successfully downloaded: {localFilePath} ({info.Length} bytes)");
                             if (!(GetDateFromLogFilename(fileName) == DateTime.Today))
                             {
                                 if (_hubCom.DeleteNodeFile(remoteFilePath.Trim(), node.APAddress, false))//, device.Username, false))
                                 {
-                                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"[{node.Name}] 🗑 Deleted remote log file: {remoteFilePath}\n");
+                                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"[{node.Name}] 🗑 Deleted remote log file: {remoteFilePath}");
                                 }
                                 else
                                 {
-                                    logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"[{node.Name}] ⚠ Successfully downloaded, but could not delete remote log file: {remoteFilePath}\n");
+                                    logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"[{node.Name}] ⚠ Successfully downloaded, but could not delete remote log file: {remoteFilePath}");
                                     hadErrors = true;
                                 }
                             }
                         }
                         else
                         {
-                            logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"[{node.Name}] ⚠ Download reported success but file not found: {localFilePath}\n");
+                            logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"[{node.Name}] ⚠ Download reported success but file not found: {localFilePath}");
                             hadErrors = true;
                         }
                     }                    
@@ -577,7 +573,7 @@ namespace Dplus_Desktop
                 // Create per-device local log folder
                 string deviceLocalCapturesDir = Path.Combine(baseLocalCapturesDir, node.Name);
 
-                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Checking Captures on {node.Name} ({node.APAddress})...\n");
+                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Checking Captures on {node.Name} ({node.APAddress})...");
 
                 // Ask remote system for a list of .png files for each capture type
                 foreach (string type in captureTypes)
@@ -587,42 +583,39 @@ namespace Dplus_Desktop
                     if (!Directory.Exists(localTypeDir))
                         Directory.CreateDirectory(localTypeDir);
 
-                    //string cmd = $"ls -1 {remoteTypeDir}/*.png 2>/dev/null";
-                    //string result = _hubCom.ExecuteNodeCommand(cmd, device.APAddress, device.Username);
-                    //string[] remoteFiles = result.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
                     string[] remoteFiles = _hubCom.GetListOfNodeFiles(remoteTypeDir, "log", node.APAddress, node.Username);
 
                     if (remoteFiles.Length == 0)
                     {
-                        logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"No {type} files found on {node.Name}.\n");
+                        logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"No {type} files found on {node.Name}.");
                         continue;
                     }
                     else
                     {
-                        logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Found {remoteFiles.Length} {type} files on {node.Name}.\n");
+                        logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Found {remoteFiles.Length} {type} files on {node.Name}.");
 
                         foreach (string remoteFilePath in remoteFiles)
                         {
                             string fileName = Path.GetFileName(remoteFilePath.Trim());
                             string localFilePath = Path.Combine(localTypeDir, fileName);
 
-                            //OutputText($"[{device.Name}] Downloading {remoteFilePath} → {localFilePath}\n", LogLevel.INFO);
+                            //OutputText($"[{device.Name}] Downloading {remoteFilePath} → {localFilePath}", LogLevel.INFO);
                             if (_hubCom.CopyNodeToPC(remoteFilePath.Trim(), localFilePath, node.APAddress))
                             {
                                 if (_hubCom.DeleteNodeFile(remoteFilePath.Trim(), node.APAddress, false))//, device.Username, false))
                                 {
                                     var info = new FileInfo(localFilePath);
-                                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"[{node.Name}] ✔ Successfully downloaded: {localFilePath} ({info.Length} bytes)\n");
+                                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"[{node.Name}] ✔ Successfully downloaded: {localFilePath} ({info.Length} bytes)");
                                 }
                                 else
                                 {
-                                    logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"[{node.Name}] ⚠ Successfully downloaded, but could not delete remote file after download: {remoteFilePath}\n");
+                                    logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"[{node.Name}] ⚠ Successfully downloaded, but could not delete remote file after download: {remoteFilePath}");
                                     hadErrors = true;
                                 }
                             }
                             else
                             {
-                                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"[{node.Name}] ⚠ Download failed: {localFilePath}\n");
+                                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"[{node.Name}] ⚠ Download failed: {localFilePath}");
                                 hadErrors = true;
                             }
                         }
@@ -639,22 +632,17 @@ namespace Dplus_Desktop
 
             // Hub reconstructions
             {
-                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Checking reconstructions on {_hub.Name}...\n");
-
-                // Ask remote system for a list of .json files
-                //string cmd = $"ls -1 {remoteReconstructionsDir}*.json 2>/dev/null";
-                //string result = _hubCom.ExecuteHubCommand(cmd);
-                //var remoteFiles = result.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Checking reconstructions on {_hub.Name}...");
 
                 string[] remoteFiles = _hubCom.GetListOfHubFiles(remoteReconstructionsDir, "json");
 
                 if (remoteFiles.Length == 0)
                 {
-                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"No reconstruction files found on {_hub.Name}.\n");
+                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"No reconstruction files found on {_hub.Name}.");
                 }
                 else
                 {
-                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Found {remoteFiles.Length} reconstruction files on {_hub.Name}.\n");
+                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Found {remoteFiles.Length} reconstruction files on {_hub.Name}.");
 
                     foreach (string remoteFilePath in remoteFiles)
                     {
@@ -665,25 +653,23 @@ namespace Dplus_Desktop
                         string fileName = Path.GetFileName(remoteFilePath.Trim());
                         string localFilePath = Path.Combine(baseLocalHubReconstructionsDir, fileName);
 
-                        //OutputText($"[{_hub.Name}] Downloading {remoteFilePath} → {localFilePath}\n", LogLevel.INFO);
                         if (_hubCom.CopyHubToPC(remoteFilePath.Trim(), localFilePath))
                         {
                             var info = new FileInfo(localFilePath);
-                            //OutputText($"[{_hub.Name}] ✔ Verified: {localFilePath} ({info.Length} bytes)\n", LogLevel.INFO);
+
                             if (_hubCom.DeleteHubFile(remoteFilePath.Trim(), false))
                             {
-                                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"[{_hub.Name}] ✔ Successfully downloaded reconstruction file: {remoteFilePath}\n");
-                                //OutputText($"[{_hub.Name}] 🗑 Deleted reconstruction file: {remoteFilePath}\n", LogLevel.INFO);
+                                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"[{_hub.Name}] ✔ Successfully downloaded reconstruction file: {remoteFilePath}");
                             }
                             else
                             {
-                                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"[{_hub.Name}] ⚠ Successfully downloaded, but could not delete reconstruction file: {remoteFilePath}\n");
+                                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"[{_hub.Name}] ⚠ Successfully downloaded, but could not delete reconstruction file: {remoteFilePath}");
                                 hadErrors = true;
                             }
                         }
                         else
                         {
-                            logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"[{_hub.Name}] ⚠ Download failed: {localFilePath}\n");
+                            logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"[{_hub.Name}] ⚠ Download failed: {localFilePath}");
                             hadErrors = true;
                         }
                     }
@@ -709,8 +695,8 @@ namespace Dplus_Desktop
             if (backupFirst)
                 BackupBinFiles();
 
-            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Ready to recompile manually.  Please Run:\n");
-            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "time make -C /home/camcpp/build\n");
+            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Ready to recompile manually.  Please Run:");
+            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "time make -C /home/camcpp/build");
         }
         public void AutoRecompile(bool backupFirst)
         {
@@ -728,16 +714,16 @@ namespace Dplus_Desktop
         }
         public void CreateSettingsFiles()
         {
-            logger.Log(mLogger.LogLevel.INFO, "Uploader", "Creating new settings files...\n");
+            logger.Log(mLogger.LogLevel.INFO, "Uploader", "Creating new settings files...");
 
             string hubPath = Settings.All.SourceFilesDirectory + "hubSettings.json";
             string backupHubPath = Settings.All.SourceFilesDirectory + "hubSettings_backup.json";
             if (File.Exists(hubPath))
             {
-                logger.Log(mLogger.LogLevel.INFO, "Uploader", "Saving new hubSettings_backup.json\n");
+                logger.Log(mLogger.LogLevel.INFO, "Uploader", "Saving new hubSettings_backup.json");
                 File.Copy(hubPath, backupHubPath, true);
             }
-            logger.Log(mLogger.LogLevel.INFO, "Uploader", "Saving new hubSettings.json\n");
+            logger.Log(mLogger.LogLevel.INFO, "Uploader", "Saving new hubSettings.json");
             ClusterProfile? profile = Settings.All.ClusterProfiles.FirstOrDefault(p => p.profileName == Settings.All.ClusterProfileToUse);
             if (profile != null)
                 Settings.SaveHubSettings(_hub, profile, hubPath);
@@ -755,15 +741,15 @@ namespace Dplus_Desktop
                     string backupNodePath = Settings.All.SourceFilesDirectory + $"{node.Name}Settings_backup.json";
                     if (File.Exists(nodePath))
                     {
-                        logger.Log(mLogger.LogLevel.INFO, "Uploader", $"Saving new {node.Name}Settings_backup.json\n");
+                        logger.Log(mLogger.LogLevel.INFO, "Uploader", $"Saving new {node.Name}Settings_backup.json");
                         File.Copy(nodePath, backupNodePath, true);
                     }
 
-                    logger.Log(mLogger.LogLevel.INFO, "Uploader", $"Saving new {node.Name}Settings.json\n");
+                    logger.Log(mLogger.LogLevel.INFO, "Uploader", $"Saving new {node.Name}Settings.json");
                     Settings.SaveNodeSettings(node, Settings.All.ClusterProfiles.FirstOrDefault(p => p.profileName == Settings.All.ClusterProfileToUse), nodePath);
                 }
             }
-            logger.Log(mLogger.LogLevel.INFO, "Uploader", "Settings files creation complete.\n");
+            logger.Log(mLogger.LogLevel.INFO, "Uploader", "Settings files creation complete.");
         }
         public void DistributeRuntimeFiles()
         {
@@ -852,6 +838,19 @@ namespace Dplus_Desktop
                 logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", "Error Message:   " + ex.Message);
                 if (ex.InnerException != null)
                     logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", "Inner Ex:        " + ex.InnerException.Message);
+            }
+        }
+
+        public void TestIsConnected()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                //if (_hubCom.IsConnected)  //fast
+                //if (CheckSSH())           //fast
+                if ((int)CheckSystem() > 1) //slow (150 ms?)
+                    logger.Log(mLogger.LogLevel.DEBUG, "ClusterManager_IsConnected", $"Is Connected {i}");
+                else
+                    logger.Log(mLogger.LogLevel.DEBUG, "ClusterManager_IsConnected", $"Is not Connected {i}");
             }
         }
     }
