@@ -42,6 +42,25 @@ namespace Dplus_Desktop
             //checkSSHDevice(currentCluster, true);
         }
 
+        public ServiceStatus CheckSystem()
+        {
+            if (CheckSSH())
+            {
+                ServiceStatus returnValue;// = ServiceStatus.Active;
+                ServiceStatus hubValue = CheckDeviceServiceStatus(_hub);
+
+                returnValue = hubValue;
+                foreach (Device node in _nodes)
+                {
+                    ServiceStatus nodeValue = CheckDeviceServiceStatus(node);
+                    if (nodeValue > returnValue)
+                        returnValue = nodeValue;
+                }
+                return returnValue;
+            }
+            else
+                return ServiceStatus.Error;
+        }
         public bool CheckSSH(bool verbose = false)
         {
             string host = _hubCom._host;
@@ -285,6 +304,8 @@ namespace Dplus_Desktop
         {
             UploadSourceFiles();
             UploadModelFiles();
+
+            LoadManagedFiles();
         }
         private void UploadSourceFiles()
         {
