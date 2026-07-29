@@ -1,4 +1,4 @@
-﻿//using Dplus_Desktop.SettingsManager;
+﻿//using Dplus_Desktop.;
 using Dplus_Desktop.SettingsManager;
 using jCommunicator;
 using Microsoft.Extensions.Logging;
@@ -42,24 +42,22 @@ namespace Dplus_Desktop
             //checkSSHDevice(currentCluster, true);
         }
 
-        public ServiceStatus CheckSystem()
+        public ClusterStatus CheckSystem()
         {
-            if (CheckSSH())
-            {
-                ServiceStatus returnValue;// = ServiceStatus.Active;
+            bool isConnected = CheckSSH();
+            
                 ServiceStatus hubValue = CheckDeviceServiceStatus(_hub);
-
-                returnValue = hubValue;
+                Dictionary<string, ServiceStatus> nodeValues = new Dictionary<string, ServiceStatus>();
                 foreach (Device node in _nodes)
                 {
-                    ServiceStatus nodeValue = CheckDeviceServiceStatus(node);
-                    if (nodeValue > returnValue)
-                        returnValue = nodeValue;
-                }
-                return returnValue;
+                    if (node.isActive)
+                        nodeValues.Add(node.Name, CheckDeviceServiceStatus(node));
             }
-            else
-                return ServiceStatus.Error;
+            return new ClusterStatus(isConnected,
+                                      nodeValues.Count,
+                                      hubValue,
+                                      nodeValues);
+                        
         }
         public bool CheckSSH(bool verbose = false)
         {
@@ -158,7 +156,7 @@ namespace Dplus_Desktop
                     result = "failed";
                 }
 
-                switch (result)
+                switch (result.Trim())
                 {
                     case "active":
                         return ServiceStatus.Active;
@@ -847,11 +845,29 @@ namespace Dplus_Desktop
             {
                 //if (_hubCom.IsConnected)  //fast
                 //if (CheckSSH())           //fast
-                if ((int)CheckSystem() > 1) //slow (150 ms?)
+                if (CheckSystem().SSHConnected) //slow (150 ms?)
                     logger.Log(mLogger.LogLevel.DEBUG, "ClusterManager_IsConnected", $"Is Connected {i}");
                 else
                     logger.Log(mLogger.LogLevel.DEBUG, "ClusterManager_IsConnected", $"Is not Connected {i}");
             }
         }
     }
+    public sealed class ClusterStatus
+    {
+        public bool SSHConnected { get; init; }
+
+        public int NodeCount { get; init; }
+
+        public ServiceStatus HubServiceStatus { get; init; }
+        public Dictionary<string, ServiceStatus> NodeServiceStatuses { get; init; }
+
+        public ClusterStatus(bool SSHConnected, int NodeCount, ServiceStatus HubServiceStatus, Dictionary<string, ServiceStatus> NodeServiceStatuses)
+        {
+            this.SSHConnected = SSHConnected;
+            this.NodeCount = NodeCount;
+            this.HubServiceStatus = HubServiceStatus;
+            this.NodeServiceStatuses = NodeServiceStatuses;
+        }
+    }
+
 }
