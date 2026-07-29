@@ -288,10 +288,10 @@
             // CurrentCluster_StatusStrip
             // 
             CurrentCluster_StatusStrip.Font = new Font("Segoe UI", 8F);
-            CurrentCluster_StatusStrip.Location = new Point(224, 12);
+            CurrentCluster_StatusStrip.Location = new Point(198, 4);
             CurrentCluster_StatusStrip.MinimumSize = new Size(150, 25);
             CurrentCluster_StatusStrip.Name = "CurrentCluster_StatusStrip";
-            CurrentCluster_StatusStrip.Size = new Size(316, 31);
+            CurrentCluster_StatusStrip.Size = new Size(342, 31);
             CurrentCluster_StatusStrip.TabIndex = 18;
             // 
             // ModelFiles_Box
@@ -440,7 +440,6 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(551, 782);
-            Controls.Add(CurrentCluster_StatusStrip);
             Controls.Add(Nodes_Box_Label);
             Controls.Add(Nodes_Box);
             Controls.Add(RuntimeFiles_Box);
@@ -451,6 +450,7 @@
             Controls.Add(ModelFiles_Box);
             Controls.Add(Controls_GroupBox);
             Controls.Add(SourceFiles_Box);
+            Controls.Add(CurrentCluster_StatusStrip);
             Name = "Uploader";
             Text = "Upload files to camcpp";
             FormClosing += Uploader_FormClosing;

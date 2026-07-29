@@ -37,19 +37,19 @@ namespace Dplus_Desktop.WinForms.Controls.ClusterStatusDisplay
         {
             base.OnPaint(e);
 
-            int margin = 25;
+            int margin = 35;
             int diameter = 5;
 
             int desktopX = margin;
             int hubX = Width / 2;
             int nodeX = Width - margin;
 
-            int y = Height / 2;
+            int y = (Height - diameter) / 2;
 
             Graphics g = e.Graphics;
             g.Clear(SystemColors.Control);
 
-            DrawBorder(g);
+            //DrawBorder(g);
 
             DrawDevice(g, "Desktop", desktopX, y, _colorProvider.GetColor(ServiceStatus.Active));
 
@@ -70,7 +70,7 @@ namespace Dplus_Desktop.WinForms.Controls.ClusterStatusDisplay
 
         private void DrawDevice(Graphics g, string label, int x, int y, Color color)
         {
-            int deviceWidth = 40;
+            int deviceWidth = 60;
             int radius = 5;
 
             Rectangle circle = new Rectangle(x - radius, y - (int)(Height * 0.2), radius * 2, radius * 2);
@@ -81,13 +81,15 @@ namespace Dplus_Desktop.WinForms.Controls.ClusterStatusDisplay
             g.FillEllipse(brush, circle);
             g.DrawEllipse(pen, circle);
 
+            RectangleF textRect = new(x - (deviceWidth / 2), y + Height * 0.2f + radius - (Font.Height / 2), deviceWidth, Font.Height);
             using StringFormat sf = new()
             {
-                Alignment = StringAlignment.Near,
+                Alignment = StringAlignment.Center,
                 LineAlignment = StringAlignment.Center
             };
 
-            g.DrawString(label, Font, Brushes.Black, x - (deviceWidth / 2), y + ((int)(Height * 0.2) + radius), sf);
+            //g.DrawString(label, Font, Brushes.Blue, x - (deviceWidth / 2), y + ((int)(Height * 0.2) + radius), sf);
+            g.DrawString(label, Font, Brushes.Black, textRect, sf);
         }
 
         private void DrawConnection(Graphics g, int x, int y, int connectionLength, Color color)
