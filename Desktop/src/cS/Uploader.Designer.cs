@@ -46,17 +46,14 @@
             Upload_Button = new Button();
             ManualRecompile_Button = new Button();
             SourceCode_GroupBox = new GroupBox();
+            BackupFirst_Box = new CheckBox();
             AutoRecompile_Button1 = new Button();
             CreateJSONfiles_Button = new Button();
             DistributeRuntimeFiles_Button = new Button();
             RaspberryPi_GroupBox = new GroupBox();
             SSHSCP_GroupBox = new GroupBox();
             Controls_GroupBox = new GroupBox();
-            Status_Connction_Label = new Label();
-            Status_SourceCode_Label = new Label();
-            Status_RaspberryPi_Label = new Label();
-            Status_SystemCTLService_Label = new Label();
-            Status_SSHSCP_Label = new Label();
+            CurrentCluster_StatusStrip = new Dplus_Desktop.WinForms.Controls.ClusterStatusDisplay.DeviceStatusStrip();
             ModelFiles_Box = new ListView();
             ModelName = new ColumnHeader();
             ModelType = new ColumnHeader();
@@ -77,7 +74,6 @@
             IPAddress = new ColumnHeader();
             columnHeader5 = new ColumnHeader();
             columnHeader6 = new ColumnHeader();
-            BackupFirst_Box = new CheckBox();
             SystemCTLService_GroupBox.SuspendLayout();
             SourceCode_GroupBox.SuspendLayout();
             RaspberryPi_GroupBox.SuspendLayout();
@@ -250,6 +246,16 @@
             SourceCode_GroupBox.TabStop = false;
             SourceCode_GroupBox.Text = "Source Code";
             // 
+            // BackupFirst_Box
+            // 
+            BackupFirst_Box.AutoSize = true;
+            BackupFirst_Box.Location = new Point(168, 51);
+            BackupFirst_Box.Name = "BackupFirst_Box";
+            BackupFirst_Box.Size = new Size(65, 19);
+            BackupFirst_Box.TabIndex = 13;
+            BackupFirst_Box.Text = "Backup";
+            BackupFirst_Box.UseVisualStyleBackColor = true;
+            // 
             // AutoRecompile_Button1
             // 
             AutoRecompile_Button1.Location = new Point(168, 22);
@@ -268,7 +274,7 @@
             CreateJSONfiles_Button.TabIndex = 11;
             CreateJSONfiles_Button.Text = "Create json";
             CreateJSONfiles_Button.UseVisualStyleBackColor = true;
-            CreateJSONfiles_Button.Click += CreateSettingsfiles_Button_Click;
+            CreateJSONfiles_Button.Click += CreateSettingsFiles_Button_Click;
             // 
             // DistributeRuntimeFiles_Button
             // 
@@ -304,67 +310,26 @@
             // 
             // Controls_GroupBox
             // 
-            Controls_GroupBox.Controls.Add(Status_Connction_Label);
-            Controls_GroupBox.Controls.Add(Status_SourceCode_Label);
+            Controls_GroupBox.Controls.Add(CurrentCluster_StatusStrip);
             Controls_GroupBox.Controls.Add(SourceCode_GroupBox);
-            Controls_GroupBox.Controls.Add(Status_RaspberryPi_Label);
-            Controls_GroupBox.Controls.Add(Status_SystemCTLService_Label);
-            Controls_GroupBox.Controls.Add(Status_SSHSCP_Label);
             Controls_GroupBox.Controls.Add(SystemCTLService_GroupBox);
             Controls_GroupBox.Controls.Add(RaspberryPi_GroupBox);
             Controls_GroupBox.Controls.Add(SSHSCP_GroupBox);
             Controls_GroupBox.Location = new Point(12, 661);
             Controls_GroupBox.Name = "Controls_GroupBox";
-            Controls_GroupBox.Size = new Size(764, 133);
+            Controls_GroupBox.Size = new Size(764, 139);
             Controls_GroupBox.TabIndex = 13;
             Controls_GroupBox.TabStop = false;
             Controls_GroupBox.Text = "Controls";
             // 
-            // Status_Connction_Label
+            // CurrentCluster_StatusStrip
             // 
-            Status_Connction_Label.AutoSize = true;
-            Status_Connction_Label.Location = new Point(537, 105);
-            Status_Connction_Label.Margin = new Padding(0);
-            Status_Connction_Label.Name = "Status_Connction_Label";
-            Status_Connction_Label.Size = new Size(216, 15);
-            Status_Connction_Label.TabIndex = 17;
-            Status_Connction_Label.Text = "------------------<[?]>------------------";
-            // 
-            // Status_SourceCode_Label
-            // 
-            Status_SourceCode_Label.AutoSize = true;
-            Status_SourceCode_Label.Location = new Point(186, 105);
-            Status_SourceCode_Label.Name = "Status_SourceCode_Label";
-            Status_SourceCode_Label.Size = new Size(179, 15);
-            Status_SourceCode_Label.TabIndex = 16;
-            Status_SourceCode_Label.Text = "--------------<[+]>--------------";
-            // 
-            // Status_RaspberryPi_Label
-            // 
-            Status_RaspberryPi_Label.AutoSize = true;
-            Status_RaspberryPi_Label.Location = new Point(97, 105);
-            Status_RaspberryPi_Label.Name = "Status_RaspberryPi_Label";
-            Status_RaspberryPi_Label.Size = new Size(89, 15);
-            Status_RaspberryPi_Label.TabIndex = 14;
-            Status_RaspberryPi_Label.Text = "-----<[+]>-----";
-            // 
-            // Status_SystemCTLService_Label
-            // 
-            Status_SystemCTLService_Label.AutoSize = true;
-            Status_SystemCTLService_Label.Location = new Point(360, 105);
-            Status_SystemCTLService_Label.Name = "Status_SystemCTLService_Label";
-            Status_SystemCTLService_Label.Size = new Size(179, 15);
-            Status_SystemCTLService_Label.TabIndex = 15;
-            Status_SystemCTLService_Label.Text = "--------------<[+]>--------------";
-            // 
-            // Status_SSHSCP_Label
-            // 
-            Status_SSHSCP_Label.AutoSize = true;
-            Status_SSHSCP_Label.Location = new Point(7, 105);
-            Status_SSHSCP_Label.Name = "Status_SSHSCP_Label";
-            Status_SSHSCP_Label.Size = new Size(89, 15);
-            Status_SSHSCP_Label.TabIndex = 13;
-            Status_SSHSCP_Label.Text = "-----<[+]>-----";
+            CurrentCluster_StatusStrip.Font = new Font("Segoe UI", 8F);
+            CurrentCluster_StatusStrip.Location = new Point(6, 102);
+            CurrentCluster_StatusStrip.MinimumSize = new Size(150, 25);
+            CurrentCluster_StatusStrip.Name = "CurrentCluster_StatusStrip";
+            CurrentCluster_StatusStrip.Size = new Size(752, 31);
+            CurrentCluster_StatusStrip.TabIndex = 18;
             // 
             // ModelFiles_Box
             // 
@@ -507,21 +472,11 @@
             columnHeader6.Text = "Last Modified";
             columnHeader6.Width = 175;
             // 
-            // BackupFirst_Box
-            // 
-            BackupFirst_Box.AutoSize = true;
-            BackupFirst_Box.Location = new Point(168, 51);
-            BackupFirst_Box.Name = "BackupFirst_Box";
-            BackupFirst_Box.Size = new Size(65, 19);
-            BackupFirst_Box.TabIndex = 13;
-            BackupFirst_Box.Text = "Backup";
-            BackupFirst_Box.UseVisualStyleBackColor = true;
-            // 
             // Uploader
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(788, 803);
+            ClientSize = new Size(788, 812);
             Controls.Add(Nodes_Box_Label);
             Controls.Add(Nodes_Box);
             Controls.Add(RuntimeFiles_Box);
@@ -541,7 +496,6 @@
             RaspberryPi_GroupBox.ResumeLayout(false);
             SSHSCP_GroupBox.ResumeLayout(false);
             Controls_GroupBox.ResumeLayout(false);
-            Controls_GroupBox.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -565,10 +519,6 @@
         private GroupBox RaspberryPi_GroupBox;
         private GroupBox SSHSCP_GroupBox;
         private GroupBox Controls_GroupBox;
-        private Label Status_SSHSCP_Label;
-        private Label Status_SystemCTLService_Label;
-        private Label Status_RaspberryPi_Label;
-        private Label Status_SourceCode_Label;
         private Button Download_Button;
         private ListView ModelFiles_Box;
         private ColumnHeader ModelName;
@@ -598,9 +548,9 @@
         private ColumnHeader LastModifiedModels;
         private ColumnHeader IPAddress;
         private ColumnHeader columnHeader1;
-        private Label Status_Connction_Label;
         private Button CreateJSONfiles_Button;
         private Button AutoRecompile_Button1;
         private CheckBox BackupFirst_Box;
+        private Dplus_Desktop.WinForms.Controls.ClusterStatusDisplay.DeviceStatusStrip CurrentCluster_StatusStrip;
     }
 }

@@ -49,10 +49,11 @@ namespace Dplus_Desktop
             else
             {
                 Clusters_Box.SelectedIndex = 0;
-                currentCluster.CheckSSH(true);
-            }
 
-            UpdateManagedFiles_Boxes();
+                checkServiceStatus(currentCluster);
+
+                UpdateManagedFiles_Boxes();
+            }
         }
 
         private void AddLogSource(string source, Color color = default, bool andModules = true)
@@ -287,155 +288,168 @@ namespace Dplus_Desktop
         }
         private void checkServiceStatus(ClusterManager com)
         {
-            setGUISSHStatus(com.CheckSSH(true));
+            CurrentCluster_StatusStrip.UpdateStatus(com.CheckSystem());
 
-            string hubServiceName = "hub.service";
-            string nodeServiceName = "node.service";
-            ServiceStatus hubResult = ServiceStatus.Error;
-            logger.Log(LogLevel.INFO, "Uploader", $"Checking status of {hubServiceName}...\n");
+            //ClusterStatus status = com.CheckSystem();
+            //CurrentCluster_StatusStrip.UpdateStatus(status);
 
-            // Run systemctl command to get status
-            try
-            {
-                hubResult = com.CheckDeviceServiceStatus(com._hub.Name);
-                logger.Log(LogLevel.INFO, "Uploader", $"Status of {hubServiceName} on Hub: {hubResult}\n");
-                foreach (ListViewItem node in Nodes_Box.Items)
-                {
-                    Device? nodeDevice = Settings.All.Nodes.Find(d => d.Name == node.SubItems[0].Text);
-                    if (nodeDevice != null && nodeDevice.isActive)
-                    {
-                        ServiceStatus nodeResult = com.CheckDeviceServiceStatus(nodeDevice.Name);
-                        logger.Log(LogLevel.INFO, "Uploader", $"Status of {nodeServiceName} on {nodeDevice.Name}: {nodeResult}\n");
-                        switch (nodeResult)
-                        {
-                            case ServiceStatus.Inactive:
-                            case ServiceStatus.Deactivating:
-                                node.BackColor = Color.Yellow;
-                                break;
+            //string hubServiceName = "hub.service";
+            //string nodeServiceName = "node.service";
+            //ServiceStatus hubResult = ServiceStatus.Error;
+            //logger.Log(LogLevel.INFO, "Uploader", $"Checking status of {hubServiceName}...\n");
 
-                            case ServiceStatus.Active:
-                            case ServiceStatus.Activating:
-                                node.BackColor = Color.Green;
-                                break;
+            //// Run systemctl command to get status
+            //try
+            //{
+            //    hubResult = com.CheckDeviceServiceStatus(com._hub.Name);
+            //    logger.Log(LogLevel.INFO, "Uploader", $"Status of {hubServiceName} on Hub: {hubResult}\n");
+            //    foreach (ListViewItem node in Nodes_Box.Items)
+            //    {
+            //        Device? nodeDevice = Settings.All.Nodes.Find(d => d.Name == node.SubItems[0].Text);
+            //        if (nodeDevice != null && nodeDevice.isActive)
+            //        {
+            //            ServiceStatus nodeResult = com.CheckDeviceServiceStatus(nodeDevice.Name);
+            //            logger.Log(LogLevel.INFO, "Uploader", $"Status of {nodeServiceName} on {nodeDevice.Name}: {nodeResult}\n");
+            //            switch (nodeResult)
+            //            {
+            //                case ServiceStatus.Inactive:
+            //                case ServiceStatus.Deactivating:
+            //                    node.BackColor = Color.Yellow;
+            //                    break;
 
-                            case ServiceStatus.Failed:
-                                node.BackColor = Color.Red;
-                                break;
+            //                case ServiceStatus.Active:
+            //                case ServiceStatus.Activating:
+            //                    node.BackColor = Color.Green;
+            //                    break;
 
-                            case ServiceStatus.Error:
-                                node.BackColor = Color.DarkRed;
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        node.BackColor = Color.Gray;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.Log(LogLevel.ERROR, "Uploader", $"Error checking service status: {ex.Message}\n");
-                hubResult = ServiceStatus.Failed;
-            }
+            //                case ServiceStatus.Failed:
+            //                    node.BackColor = Color.Red;
+            //                    break;
 
-            switch (hubResult)
-            {
-                case ServiceStatus.Active:
-                    logger.Log(LogLevel.INFO, "Uploader", $"{hubServiceName} is running.\n");
+            //                case ServiceStatus.Error:
+            //                    node.BackColor = Color.DarkRed;
+            //                    break;
+            //            }
+            //        }
+            //        else
+            //        {
+            //            node.BackColor = Color.Gray;
+            //        }
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    logger.Log(LogLevel.ERROR, "Uploader", $"Error checking service status: {ex.Message}\n");
+            //    hubResult = ServiceStatus.Failed;
+            //}
 
-                    Status_SystemCTLService_Label.ForeColor = Color.Green;
-                    Status_SourceCode_Label.ForeColor = Color.Orange;
+            //switch (status.HubServiceStatus)
+            //{
+            //    case ServiceStatus.Active:
+            //        logger.Log(LogLevel.INFO, "Uploader", $"'hub.service' is running.\n");
 
-                    StartService_Button.Enabled = false;
-                    StopService_Button.Enabled = true;
-                    CheckServiceStatus_Button.Enabled = true;
-                    Upload_Button.Enabled = true;
-                    ManualRecompile_Button.Enabled = true;
-                    break;
+            //        //Status_SystemCTLService_Label.ForeColor = Color.Green;
+            //        //Status_SourceCode_Label.ForeColor = Color.Orange;
 
-                case ServiceStatus.Inactive:
-                    logger.Log(LogLevel.WARN, "Uploader", $"{hubServiceName} is stopped.\n");
+            //        StartService_Button.Enabled = false;
+            //        StopService_Button.Enabled = true;
+            //        CheckServiceStatus_Button.Enabled = true;
+            //        Upload_Button.Enabled = true;
+            //        ManualRecompile_Button.Enabled = true;
+            //        break;
 
-                    Status_SystemCTLService_Label.ForeColor = Color.Orange;
-                    Status_SourceCode_Label.ForeColor = Color.Green;
+            //    case ServiceStatus.Inactive:
+            //        logger.Log(LogLevel.WARN, "Uploader", $"{hubServiceName} is stopped.\n");
 
-                    StartService_Button.Enabled = true;
-                    StopService_Button.Enabled = false;
-                    CheckServiceStatus_Button.Enabled = true;
-                    Upload_Button.Enabled = true;
-                    ManualRecompile_Button.Enabled = true;
-                    break;
+            //        //Status_SystemCTLService_Label.ForeColor = Color.Orange;
+            //        //Status_SourceCode_Label.ForeColor = Color.Green;
 
-                case ServiceStatus.Failed:
-                    logger.Log(LogLevel.ERROR, "Uploader", $"{hubServiceName} has failed.\n");
+            //        StartService_Button.Enabled = true;
+            //        StopService_Button.Enabled = false;
+            //        CheckServiceStatus_Button.Enabled = true;
+            //        Upload_Button.Enabled = true;
+            //        ManualRecompile_Button.Enabled = true;
+            //        break;
 
-                    Status_SystemCTLService_Label.ForeColor = Color.Red;
-                    Status_SourceCode_Label.ForeColor = Color.Green;
+            //    case ServiceStatus.Failed:
+            //        logger.Log(LogLevel.ERROR, "Uploader", $"{hubServiceName} has failed.\n");
 
-                    StartService_Button.Enabled = true;
-                    StopService_Button.Enabled = false;
-                    CheckServiceStatus_Button.Enabled = true;
-                    Upload_Button.Enabled = true;
-                    ManualRecompile_Button.Enabled = true;
-                    break;
+            //        //Status_SystemCTLService_Label.ForeColor = Color.Red;
+            //        //Status_SourceCode_Label.ForeColor = Color.Green;
 
-                case ServiceStatus.Activating:
-                    logger.Log(LogLevel.INFO, "Uploader", $"{hubServiceName} is starting up.\n");
+            //        StartService_Button.Enabled = true;
+            //        StopService_Button.Enabled = false;
+            //        CheckServiceStatus_Button.Enabled = true;
+            //        Upload_Button.Enabled = true;
+            //        ManualRecompile_Button.Enabled = true;
+            //        break;
 
-                    Status_SystemCTLService_Label.ForeColor = Color.Green;
-                    Status_SourceCode_Label.ForeColor = Color.Orange;
+            //    case ServiceStatus.Activating:
+            //        logger.Log(LogLevel.INFO, "Uploader", $"{hubServiceName} is starting up.\n");
 
-                    StartService_Button.Enabled = false;
-                    StopService_Button.Enabled = true;
-                    CheckServiceStatus_Button.Enabled = true;
-                    Upload_Button.Enabled = true;
-                    ManualRecompile_Button.Enabled = true;
-                    break;
+            //        //Status_SystemCTLService_Label.ForeColor = Color.Green;
+            //        //Status_SourceCode_Label.ForeColor = Color.Orange;
 
-                case ServiceStatus.Deactivating:
-                    logger.Log(LogLevel.INFO, "Uploader", $"{hubServiceName} is stopping.\n");
+            //        StartService_Button.Enabled = false;
+            //        StopService_Button.Enabled = true;
+            //        CheckServiceStatus_Button.Enabled = true;
+            //        Upload_Button.Enabled = true;
+            //        ManualRecompile_Button.Enabled = true;
+            //        break;
 
-                    Status_SystemCTLService_Label.ForeColor = Color.Red;
-                    Status_SourceCode_Label.ForeColor = Color.Green;
+            //    case ServiceStatus.Deactivating:
+            //        logger.Log(LogLevel.INFO, "Uploader", $"{hubServiceName} is stopping.\n");
 
-                    StartService_Button.Enabled = true;
-                    StopService_Button.Enabled = false;
-                    CheckServiceStatus_Button.Enabled = true;
-                    Upload_Button.Enabled = true;
-                    ManualRecompile_Button.Enabled = true;
-                    break;
+            //        //Status_SystemCTLService_Label.ForeColor = Color.Red;
+            //        //Status_SourceCode_Label.ForeColor = Color.Green;
 
-                default:
-                    logger.Log(LogLevel.WARN, "Uploader", $"{hubServiceName} is in an unknown state: {hubResult}\n");
+            //        StartService_Button.Enabled = true;
+            //        StopService_Button.Enabled = false;
+            //        CheckServiceStatus_Button.Enabled = true;
+            //        Upload_Button.Enabled = true;
+            //        ManualRecompile_Button.Enabled = true;
+            //        break;
 
-                    Status_SystemCTLService_Label.ForeColor = Color.Red;
-                    Status_SourceCode_Label.ForeColor = Color.Green;
+            //    default:
+            //        logger.Log(LogLevel.WARN, "Uploader", $"{hubServiceName} is in an unknown state: {hubResult}\n");
 
-                    StartService_Button.Enabled = false;
-                    StopService_Button.Enabled = false;
-                    CheckServiceStatus_Button.Enabled = true;
-                    Upload_Button.Enabled = true;
-                    ManualRecompile_Button.Enabled = true;
-                    break;
-            }
+            //        //Status_SystemCTLService_Label.ForeColor = Color.Red;
+            //        //Status_SourceCode_Label.ForeColor = Color.Green;
+
+            //        StartService_Button.Enabled = false;
+            //        StopService_Button.Enabled = false;
+            //        CheckServiceStatus_Button.Enabled = true;
+            //        Upload_Button.Enabled = true;
+            //        ManualRecompile_Button.Enabled = true;
+            //        break;
+            //}
         }
-        private void setGUISSHStatus(bool isConnected)
+        private void setGUIStatusIndicators()
         {
-            Color color = isConnected ? Color.Green : Color.Red;
-            Status_SSHSCP_Label.ForeColor = color;
-            Status_RaspberryPi_Label.ForeColor = color;
-            Status_Connction_Label.ForeColor = color;
-            Status_SourceCode_Label.ForeColor = color;
-            if (Status_SystemCTLService_Label.ForeColor == SystemColors.ControlText)
+            bool isConnected = currentCluster.CheckSSH();
+
+            if (isConnected)
             {
+                //switch (currentCluster.CheckSystem())
+                //{
+                //    case HubServiceStatus.Active:
+                //}
+
+                Color color = isConnected ? Color.Green : Color.Red;
+                //Status_SSHSCP_Label.ForeColor = color;
+                //Status_RaspberryPi_Label.ForeColor = color;
+                //Status_Connction_Label.ForeColor = color;
+                //Status_SourceCode_Label.ForeColor = color;
+                //if (Status_SystemCTLService_Label.ForeColor == SystemColors.ControlText)
+                //{
                 checkServiceStatus(clusters[Clusters_Box.Text]);
+                //}
+                RecheckStatus_Button.Enabled = isConnected;
+                Reboot_Button.Enabled = isConnected;
+                Shutdown_Button.Enabled = isConnected;
+                Upload_Button.Enabled = isConnected;
+                ManualRecompile_Button.Enabled = isConnected;
             }
-            RecheckStatus_Button.Enabled = isConnected;
-            Reboot_Button.Enabled = isConnected;
-            Shutdown_Button.Enabled = isConnected;
-            Upload_Button.Enabled = isConnected;
-            ManualRecompile_Button.Enabled = isConnected;
             if (!isConnected)
             {
                 StartService_Button.Enabled = false;
@@ -462,6 +476,7 @@ namespace Dplus_Desktop
         private void Connect_Click(object sender, EventArgs e)
         {
             currentCluster.CheckSSH(true);
+            CurrentCluster_StatusStrip.UpdateStatus(currentCluster.CheckSystem());
             UpdateManagedFiles_Boxes();
         }
         private void Upload_Button_Click(object sender, EventArgs e)
@@ -510,20 +525,25 @@ namespace Dplus_Desktop
         private void RunMain_Button_Click(object sender, EventArgs e)
         {
             currentCluster.startMain();
+            CurrentCluster_StatusStrip.UpdateStatus(currentCluster.CheckSystem());
         }
         private void StopService_Button_Click(object sender, EventArgs e)
         {
             currentCluster.stopMain();
+
+            CurrentCluster_StatusStrip.UpdateStatus(currentCluster.CheckSystem());
 
             currentCluster.DownloadFiles();
         }
         private void Reboot_Button_Click(object sender, EventArgs e)
         {
             currentCluster.RebootCluster();
+            CurrentCluster_StatusStrip.UpdateStatus(currentCluster.CheckSystem());
         }
         private void Shutdown_Button_Click(object sender, EventArgs e)
         {
             currentCluster.ShutdownCluster();
+            CurrentCluster_StatusStrip.UpdateStatus(currentCluster.CheckSystem());
         }
         private void Clusters_Box_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -531,7 +551,7 @@ namespace Dplus_Desktop
 
             LoadNodes();
         }
-        private void CreateSettingsfiles_Button_Click(object sender, EventArgs e)
+        private void CreateSettingsFiles_Button_Click(object sender, EventArgs e)
         {
             currentCluster.CreateSettingsFiles();
         }
