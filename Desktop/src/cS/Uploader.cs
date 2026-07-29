@@ -372,7 +372,7 @@ namespace Dplus_Desktop
         private void Reboot_Button_Click(object sender, EventArgs e)
         {
             clusters[Clusters_Box.Text].RebootCluster();
-            CurrentCluster_StatusStrip.UpdateStatus(clusters[Clusters_Box.Text].CheckSystem());
+            CurrentCluster_StatusStrip.UpdateStatus(new ClusterStatus());
         }
         private void Shutdown_Button_Click(object sender, EventArgs e)
         {

@@ -868,6 +868,13 @@ namespace Dplus_Desktop
             this.HubServiceStatus = HubServiceStatus;
             this.NodeServiceStatuses = NodeServiceStatuses;
         }
+        public ClusterStatus()
+        {
+            this.SSHConnected = false;
+            this.NodeCount = 0;
+            this.HubServiceStatus = ServiceStatus.Error;
+            this.NodeServiceStatuses = new Dictionary<string, ServiceStatus>();
+        }
     }
 
 }
