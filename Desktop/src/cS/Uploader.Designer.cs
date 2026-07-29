@@ -34,10 +34,8 @@
             LastModified = new ColumnHeader();
             IsForHub = new ColumnHeader();
             IsForNode = new ColumnHeader();
-            RecheckStatus_Button = new Button();
             Reboot_Button = new Button();
             Shutdown_Button = new Button();
-            Connect = new Button();
             StartService_Button = new Button();
             SystemCTLService_GroupBox = new GroupBox();
             CheckServiceStatus_Button = new Button();
@@ -51,7 +49,6 @@
             CreateJSONfiles_Button = new Button();
             DistributeRuntimeFiles_Button = new Button();
             RaspberryPi_GroupBox = new GroupBox();
-            SSHSCP_GroupBox = new GroupBox();
             Controls_GroupBox = new GroupBox();
             CurrentCluster_StatusStrip = new Dplus_Desktop.WinForms.Controls.ClusterStatusDisplay.DeviceStatusStrip();
             ModelFiles_Box = new ListView();
@@ -72,12 +69,11 @@
             Nodes_Box = new ListView();
             NodeName = new ColumnHeader();
             IPAddress = new ColumnHeader();
-            columnHeader5 = new ColumnHeader();
-            columnHeader6 = new ColumnHeader();
+            NodeLastUploaded = new ColumnHeader();
+            NodeLastModified = new ColumnHeader();
             SystemCTLService_GroupBox.SuspendLayout();
             SourceCode_GroupBox.SuspendLayout();
             RaspberryPi_GroupBox.SuspendLayout();
-            SSHSCP_GroupBox.SuspendLayout();
             Controls_GroupBox.SuspendLayout();
             SuspendLayout();
             // 
@@ -88,7 +84,7 @@
             SourceFiles_Box.GridLines = true;
             SourceFiles_Box.Location = new Point(12, 56);
             SourceFiles_Box.Name = "SourceFiles_Box";
-            SourceFiles_Box.Size = new Size(764, 195);
+            SourceFiles_Box.Size = new Size(528, 195);
             SourceFiles_Box.TabIndex = 1;
             SourceFiles_Box.UseCompatibleStateImageBehavior = false;
             SourceFiles_Box.View = View.Details;
@@ -96,37 +92,27 @@
             // FileName
             // 
             FileName.Text = "Name";
-            FileName.Width = 279;
+            FileName.Width = 156;
             // 
             // LastUploaded
             // 
             LastUploaded.Text = "Last Uploaded";
-            LastUploaded.Width = 175;
+            LastUploaded.Width = 145;
             // 
             // LastModified
             // 
             LastModified.Text = "Last Modified";
-            LastModified.Width = 175;
+            LastModified.Width = 145;
             // 
             // IsForHub
             // 
             IsForHub.Text = "Hub";
-            IsForHub.Width = 55;
+            IsForHub.Width = 30;
             // 
             // IsForNode
             // 
             IsForNode.Text = "Node";
-            IsForNode.Width = 55;
-            // 
-            // RecheckStatus_Button
-            // 
-            RecheckStatus_Button.Location = new Point(6, 51);
-            RecheckStatus_Button.Name = "RecheckStatus_Button";
-            RecheckStatus_Button.Size = new Size(75, 23);
-            RecheckStatus_Button.TabIndex = 2;
-            RecheckStatus_Button.Text = "Recheck";
-            RecheckStatus_Button.UseVisualStyleBackColor = true;
-            RecheckStatus_Button.Click += Reselect_Button_Click;
+            IsForNode.Width = 30;
             // 
             // Reboot_Button
             // 
@@ -148,16 +134,6 @@
             Shutdown_Button.UseVisualStyleBackColor = true;
             Shutdown_Button.Click += Shutdown_Button_Click;
             // 
-            // Connect
-            // 
-            Connect.Location = new Point(6, 22);
-            Connect.Name = "Connect";
-            Connect.Size = new Size(75, 23);
-            Connect.TabIndex = 6;
-            Connect.Text = "Connect";
-            Connect.UseVisualStyleBackColor = true;
-            Connect.Click += Connect_Click;
-            // 
             // StartService_Button
             // 
             StartService_Button.Location = new Point(6, 22);
@@ -174,7 +150,7 @@
             SystemCTLService_GroupBox.Controls.Add(Download_Button);
             SystemCTLService_GroupBox.Controls.Add(StopService_Button);
             SystemCTLService_GroupBox.Controls.Add(StartService_Button);
-            SystemCTLService_GroupBox.Location = new Point(447, 22);
+            SystemCTLService_GroupBox.Location = new Point(354, 22);
             SystemCTLService_GroupBox.Name = "SystemCTLService_GroupBox";
             SystemCTLService_GroupBox.Size = new Size(168, 80);
             SystemCTLService_GroupBox.TabIndex = 9;
@@ -239,7 +215,7 @@
             SourceCode_GroupBox.Controls.Add(DistributeRuntimeFiles_Button);
             SourceCode_GroupBox.Controls.Add(ManualRecompile_Button);
             SourceCode_GroupBox.Controls.Add(Upload_Button);
-            SourceCode_GroupBox.Location = new Point(192, 22);
+            SourceCode_GroupBox.Location = new Point(99, 22);
             SourceCode_GroupBox.Name = "SourceCode_GroupBox";
             SourceCode_GroupBox.Size = new Size(249, 80);
             SourceCode_GroupBox.TabIndex = 10;
@@ -290,34 +266,21 @@
             // 
             RaspberryPi_GroupBox.Controls.Add(Shutdown_Button);
             RaspberryPi_GroupBox.Controls.Add(Reboot_Button);
-            RaspberryPi_GroupBox.Location = new Point(99, 22);
+            RaspberryPi_GroupBox.Location = new Point(6, 22);
             RaspberryPi_GroupBox.Name = "RaspberryPi_GroupBox";
             RaspberryPi_GroupBox.Size = new Size(87, 80);
             RaspberryPi_GroupBox.TabIndex = 11;
             RaspberryPi_GroupBox.TabStop = false;
             RaspberryPi_GroupBox.Text = "Raspberry Pi ";
             // 
-            // SSHSCP_GroupBox
-            // 
-            SSHSCP_GroupBox.Controls.Add(RecheckStatus_Button);
-            SSHSCP_GroupBox.Controls.Add(Connect);
-            SSHSCP_GroupBox.Location = new Point(6, 22);
-            SSHSCP_GroupBox.Name = "SSHSCP_GroupBox";
-            SSHSCP_GroupBox.Size = new Size(87, 80);
-            SSHSCP_GroupBox.TabIndex = 12;
-            SSHSCP_GroupBox.TabStop = false;
-            SSHSCP_GroupBox.Text = "SSH/SCP";
-            // 
             // Controls_GroupBox
             // 
-            Controls_GroupBox.Controls.Add(CurrentCluster_StatusStrip);
             Controls_GroupBox.Controls.Add(SourceCode_GroupBox);
             Controls_GroupBox.Controls.Add(SystemCTLService_GroupBox);
             Controls_GroupBox.Controls.Add(RaspberryPi_GroupBox);
-            Controls_GroupBox.Controls.Add(SSHSCP_GroupBox);
             Controls_GroupBox.Location = new Point(12, 661);
             Controls_GroupBox.Name = "Controls_GroupBox";
-            Controls_GroupBox.Size = new Size(764, 139);
+            Controls_GroupBox.Size = new Size(528, 110);
             Controls_GroupBox.TabIndex = 13;
             Controls_GroupBox.TabStop = false;
             Controls_GroupBox.Text = "Controls";
@@ -325,10 +288,10 @@
             // CurrentCluster_StatusStrip
             // 
             CurrentCluster_StatusStrip.Font = new Font("Segoe UI", 8F);
-            CurrentCluster_StatusStrip.Location = new Point(6, 102);
+            CurrentCluster_StatusStrip.Location = new Point(224, 12);
             CurrentCluster_StatusStrip.MinimumSize = new Size(150, 25);
             CurrentCluster_StatusStrip.Name = "CurrentCluster_StatusStrip";
-            CurrentCluster_StatusStrip.Size = new Size(752, 31);
+            CurrentCluster_StatusStrip.Size = new Size(316, 31);
             CurrentCluster_StatusStrip.TabIndex = 18;
             // 
             // ModelFiles_Box
@@ -338,7 +301,7 @@
             ModelFiles_Box.GridLines = true;
             ModelFiles_Box.Location = new Point(12, 398);
             ModelFiles_Box.Name = "ModelFiles_Box";
-            ModelFiles_Box.Size = new Size(764, 112);
+            ModelFiles_Box.Size = new Size(528, 112);
             ModelFiles_Box.TabIndex = 14;
             ModelFiles_Box.UseCompatibleStateImageBehavior = false;
             ModelFiles_Box.View = View.Details;
@@ -346,22 +309,22 @@
             // ModelName
             // 
             ModelName.Text = "Model Name";
-            ModelName.Width = 279;
+            ModelName.Width = 126;
             // 
             // ModelType
             // 
             ModelType.Text = "Model Type";
-            ModelType.Width = 110;
+            ModelType.Width = 90;
             // 
             // LastPushed
             // 
             LastPushed.Text = "LastPushed";
-            LastPushed.Width = 175;
+            LastPushed.Width = 145;
             // 
             // LastModifiedModels
             // 
             LastModifiedModels.Text = "Last Modified";
-            LastModifiedModels.Width = 175;
+            LastModifiedModels.Width = 145;
             // 
             // Clusters_Box
             // 
@@ -406,7 +369,7 @@
             RuntimeFiles_Box.GridLines = true;
             RuntimeFiles_Box.Location = new Point(12, 272);
             RuntimeFiles_Box.Name = "RuntimeFiles_Box";
-            RuntimeFiles_Box.Size = new Size(764, 105);
+            RuntimeFiles_Box.Size = new Size(528, 105);
             RuntimeFiles_Box.TabIndex = 20;
             RuntimeFiles_Box.UseCompatibleStateImageBehavior = false;
             RuntimeFiles_Box.View = View.Details;
@@ -414,22 +377,22 @@
             // RuntimeName
             // 
             RuntimeName.Text = "Name";
-            RuntimeName.Width = 279;
+            RuntimeName.Width = 152;
             // 
             // columnHeader1
             // 
             columnHeader1.Text = "Last Source Change";
-            columnHeader1.Width = 153;
+            columnHeader1.Width = 124;
             // 
             // columnHeader2
             // 
             columnHeader2.Text = "Last Compliled";
-            columnHeader2.Width = 153;
+            columnHeader2.Width = 124;
             // 
             // columnHeader3
             // 
             columnHeader3.Text = "Last Pushed";
-            columnHeader3.Width = 153;
+            columnHeader3.Width = 124;
             // 
             // Nodes_Box_Label
             // 
@@ -442,12 +405,12 @@
             // 
             // Nodes_Box
             // 
-            Nodes_Box.Columns.AddRange(new ColumnHeader[] { NodeName, IPAddress, columnHeader5, columnHeader6 });
+            Nodes_Box.Columns.AddRange(new ColumnHeader[] { NodeName, IPAddress, NodeLastUploaded, NodeLastModified });
             Nodes_Box.FullRowSelect = true;
             Nodes_Box.GridLines = true;
             Nodes_Box.Location = new Point(12, 531);
             Nodes_Box.Name = "Nodes_Box";
-            Nodes_Box.Size = new Size(764, 124);
+            Nodes_Box.Size = new Size(528, 124);
             Nodes_Box.TabIndex = 21;
             Nodes_Box.UseCompatibleStateImageBehavior = false;
             Nodes_Box.View = View.Details;
@@ -455,28 +418,29 @@
             // NodeName
             // 
             NodeName.Text = "Node Name";
-            NodeName.Width = 179;
+            NodeName.Width = 119;
             // 
             // IPAddress
             // 
             IPAddress.Text = "IP";
-            IPAddress.Width = 150;
+            IPAddress.Width = 115;
             // 
-            // columnHeader5
+            // NodeLastUploaded
             // 
-            columnHeader5.Text = "Last Uploaded";
-            columnHeader5.Width = 175;
+            NodeLastUploaded.Text = "Last Uploaded";
+            NodeLastUploaded.Width = 145;
             // 
-            // columnHeader6
+            // NodeLastModified
             // 
-            columnHeader6.Text = "Last Modified";
-            columnHeader6.Width = 175;
+            NodeLastModified.Text = "Last Modified";
+            NodeLastModified.Width = 145;
             // 
             // Uploader
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(788, 812);
+            ClientSize = new Size(551, 782);
+            Controls.Add(CurrentCluster_StatusStrip);
             Controls.Add(Nodes_Box_Label);
             Controls.Add(Nodes_Box);
             Controls.Add(RuntimeFiles_Box);
@@ -494,7 +458,6 @@
             SourceCode_GroupBox.ResumeLayout(false);
             SourceCode_GroupBox.PerformLayout();
             RaspberryPi_GroupBox.ResumeLayout(false);
-            SSHSCP_GroupBox.ResumeLayout(false);
             Controls_GroupBox.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
@@ -502,13 +465,11 @@
 
         #endregion
         private ListView SourceFiles_Box;
-        private Button RecheckStatus_Button;
         private Button Reboot_Button;
         private Button Shutdown_Button;
         private ColumnHeader FileName;
         private ColumnHeader LastUploaded;
         private ColumnHeader LastModified;
-        private Button Connect;
         private Button StartService_Button;
         private GroupBox SystemCTLService_GroupBox;
         private Button StopService_Button;
@@ -517,7 +478,6 @@
         private Button ManualRecompile_Button;
         private GroupBox SourceCode_GroupBox;
         private GroupBox RaspberryPi_GroupBox;
-        private GroupBox SSHSCP_GroupBox;
         private GroupBox Controls_GroupBox;
         private Button Download_Button;
         private ListView ModelFiles_Box;
@@ -540,8 +500,8 @@
         private Label Nodes_Box_Label;
         private ListView Nodes_Box;
         private ColumnHeader NodeName;
-        private ColumnHeader columnHeader5;
-        private ColumnHeader columnHeader6;
+        private ColumnHeader NodeLastUploaded;
+        private ColumnHeader NodeLastModified;
         private ColumnHeader IsForHub;
         private ColumnHeader IsForNode;
         private ColumnHeader LastPushed;

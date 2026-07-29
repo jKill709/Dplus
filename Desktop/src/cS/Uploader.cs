@@ -81,7 +81,6 @@ namespace Dplus_Desktop
             if (Settings.isLoaded == false)
             {
                 Upload_Button.Enabled = false;
-                RecheckStatus_Button.Enabled = false;
                 Reboot_Button.Enabled = false;
                 Shutdown_Button.Enabled = false;
 
@@ -91,7 +90,6 @@ namespace Dplus_Desktop
             else
             {
                 Upload_Button.Enabled = true;
-                RecheckStatus_Button.Enabled = true;
                 Reboot_Button.Enabled = true;
                 Shutdown_Button.Enabled = true;
 
@@ -302,19 +300,19 @@ namespace Dplus_Desktop
 
             logger.LogHeading(LogLevel.INFO, "Uploader", "Uploader Exiting");
         }
-        private void Reselect_Button_Click(object sender, EventArgs e)
-        {
-            UpdateManagedFiles_Boxes();
-        }
+        //private void Reselect_Button_Click(object sender, EventArgs e)
+        //{
+        //    UpdateManagedFiles_Boxes();
+        //}
         private void CheckServiceStatus_Button_Click(object sender, EventArgs e)
         {
             checkServiceStatus(clusters[Clusters_Box.Text]);
         }
-        private void Connect_Click(object sender, EventArgs e)
-        {
-            CurrentCluster_StatusStrip.UpdateStatus(clusters[Clusters_Box.Text].CheckSystem());
-            UpdateManagedFiles_Boxes();
-        }
+        //private void Connect_Click(object sender, EventArgs e)
+        //{
+        //    CurrentCluster_StatusStrip.UpdateStatus(clusters[Clusters_Box.Text].CheckSystem());
+        //    UpdateManagedFiles_Boxes();
+        //}
         private void Upload_Button_Click(object sender, EventArgs e)
         {
             try
