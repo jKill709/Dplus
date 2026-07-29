@@ -1,10 +1,8 @@
 ﻿//using Dplus_Desktop.;
 using Dplus_Desktop.SettingsManager;
 using jCommunicator;
-using Microsoft.Extensions.Logging;
 using mLogger;
 using System.Text.RegularExpressions;
-using static OpenCvSharp.ML.DTrees;
 
 namespace Dplus_Desktop
 {
@@ -28,7 +26,7 @@ namespace Dplus_Desktop
             _hubCom = new Communicator(hub.IPAddress, hub.Username, hub.Password);
 
             _nodes = new List<Device>();
-            if (nodes != null && nodes.Count > 0)
+            if ((_hubCom.IsConnected) && (nodes != null) && (nodes.Count > 0))
                 foreach (Device node in nodes)
                 {
                     _nodes.Add(node);
@@ -45,19 +43,33 @@ namespace Dplus_Desktop
         public ClusterStatus CheckSystem()
         {
             bool isConnected = CheckSSH();
-            
+
+            if (isConnected)
+            {
                 ServiceStatus hubValue = CheckDeviceServiceStatus(_hub);
                 Dictionary<string, ServiceStatus> nodeValues = new Dictionary<string, ServiceStatus>();
                 foreach (Device node in _nodes)
                 {
                     if (node.isActive)
                         nodeValues.Add(node.Name, CheckDeviceServiceStatus(node));
+                }
+                return new ClusterStatus(true,
+                                         nodeValues.Count,
+                                         hubValue,
+                                         nodeValues);
             }
-            return new ClusterStatus(isConnected,
-                                      nodeValues.Count,
-                                      hubValue,
-                                      nodeValues);
-                        
+            else
+            {
+                Dictionary<string, ServiceStatus> nodeValues = new Dictionary<string, ServiceStatus>();
+                foreach (Device node in _nodes)
+                {
+                    nodeValues.Add(node.Name, ServiceStatus.Failed);
+                }
+                return new ClusterStatus(false,
+                                         _nodes.Count,
+                                         ServiceStatus.Failed,
+                                         nodeValues);
+            }
         }
         public bool CheckSSH(bool verbose = false)
         {
@@ -852,6 +864,7 @@ namespace Dplus_Desktop
             }
         }
     }
+
     public sealed class ClusterStatus
     {
         public bool SSHConnected { get; init; }
