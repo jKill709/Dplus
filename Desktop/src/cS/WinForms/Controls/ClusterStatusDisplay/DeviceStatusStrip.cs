@@ -9,6 +9,7 @@ namespace Dplus_Desktop.WinForms.Controls.ClusterStatusDisplay
     public class DeviceStatusStrip : UserControl, IClusterStatusDisplay
     {
         private ClusterStatus _status = new ClusterStatus(false, 0, ServiceStatus.Failed, []);
+        private ServiceStatusColorProvider _colorProvider = new ServiceStatusColorProvider();
         
         public DeviceStatusStrip()
         {
@@ -50,11 +51,11 @@ namespace Dplus_Desktop.WinForms.Controls.ClusterStatusDisplay
 
             DrawBorder(g);
 
-            DrawDevice(g, "Desktop", desktopX, y, Color.Green);
+            DrawDevice(g, "Desktop", desktopX, y, _colorProvider.GetColor(ServiceStatus.Active));
 
             DrawConnection(g, (desktopX + hubX) / 2, y, (int)((hubX - desktopX) * (0.8)), _status.SSHConnected ? Color.Green : Color.DarkGray);
 
-            DrawDevice(g, "Hub", hubX, y, _status.SSHConnected ? GetStatusColor(_status.HubServiceStatus) : Color.DarkGray);
+            DrawDevice(g, "Hub", hubX, y, _status.SSHConnected ? _colorProvider.GetColor(_status.HubServiceStatus) : Color.DarkGray);
 
             DrawConnection(g, (hubX + nodeX) / 2, y, (int)((nodeX - hubX) * (0.8)), _status.SSHConnected ? Color.Green : Color.DarkGray);
 
@@ -118,30 +119,47 @@ namespace Dplus_Desktop.WinForms.Controls.ClusterStatusDisplay
             if (!_status.SSHConnected)
                 return Color.DarkGray;
 
-            return _status.HubServiceStatus switch
-            {
-                ServiceStatus.Active => Color.ForestGreen,
-                ServiceStatus.Activating => Color.Goldenrod,
-                ServiceStatus.Deactivating => Color.Orange,
-                ServiceStatus.Inactive => Color.SteelBlue,
-                ServiceStatus.Failed => Color.Firebrick,
-                ServiceStatus.Error => Color.Firebrick,
-                _ => Color.DarkGray
-            };
+            return _colorProvider.GetColor(_status.HubServiceStatus);
         }
 
-        private Color GetStatusColor(ServiceStatus status)
+        private ServiceStatus GetWorstNodeServiceStatus()
         {
-            return status switch
+            ServiceStatus returnValue = ServiceStatus.Active;
+            foreach (var(name, status) in _status.NodeServiceStatuses)
             {
-                ServiceStatus.Active => Color.ForestGreen,
-                ServiceStatus.Activating => Color.Goldenrod,
-                ServiceStatus.Deactivating => Color.Orange,
-                ServiceStatus.Inactive => Color.SteelBlue,
-                ServiceStatus.Failed => Color.Firebrick,
-                ServiceStatus.Error => Color.Firebrick,
-                _ => Color.DarkGray
-            };
+                if (returnValue < status)
+                    returnValue = status;
+            }
+
+            return returnValue;
+        }
+        private ServiceStatus GetWorstServiceStatus()
+        {
+            ServiceStatus returnValue = GetWorstNodeServiceStatus();
+            if (returnValue < _status.HubServiceStatus)
+                returnValue = _status.HubServiceStatus;
+        
+            return returnValue; 
+        }
+        private ServiceStatus GetBestNodeServiceStatus()
+        {
+
+            ServiceStatus returnValue = ServiceStatus.Error;
+            foreach (var (name, status) in _status.NodeServiceStatuses)
+            {
+                if (returnValue > status)
+                    returnValue = status;
+            }
+
+            return returnValue;
+        }
+        private ServiceStatus GetBestServiceStatus()
+        {
+            ServiceStatus returnValue = GetBestNodeServiceStatus();
+            if (returnValue > _status.HubServiceStatus)
+                returnValue = _status.HubServiceStatus;
+
+            return returnValue;
         }
     }
 }
