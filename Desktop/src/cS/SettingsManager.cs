@@ -945,7 +945,7 @@ namespace Dplus_Desktop.SettingsManager
             All = JsonSerializer.Deserialize<AppSettings>(json, options) ?? new AppSettings();
             isLoaded = true;
         }
-        public static int MergeNewCalibrationData(string HubCalibrationSettingsFile)
+        public static async Task<int> MergeNewCalibrationData(string HubCalibrationSettingsFile)
         {
             int updated = 0;
 

@@ -1,16 +1,6 @@
 ﻿using Dplus_Desktop.SettingsManager;
 using jCommunicator;
 using mLogger;
-using Renci.SshNet.Messages;
-using System.Configuration;
-using System.Diagnostics.Eventing.Reader;
-using System.Drawing;
-using System.IO;
-using System.Text.RegularExpressions;
-using System.Windows.Forms;
-using static OpenCvSharp.ML.DTrees;
-
-
 
 namespace Dplus_Desktop
 {
@@ -300,19 +290,10 @@ namespace Dplus_Desktop
 
             logger.LogHeading(LogLevel.INFO, "Uploader", "Uploader Exiting");
         }
-        //private void Reselect_Button_Click(object sender, EventArgs e)
-        //{
-        //    UpdateManagedFiles_Boxes();
-        //}
         private void CheckServiceStatus_Button_Click(object sender, EventArgs e)
         {
             checkServiceStatus(clusters[Clusters_Box.Text]);
         }
-        //private void Connect_Click(object sender, EventArgs e)
-        //{
-        //    CurrentCluster_StatusStrip.UpdateStatus(clusters[Clusters_Box.Text].CheckSystem());
-        //    UpdateManagedFiles_Boxes();
-        //}
         private void Upload_Button_Click(object sender, EventArgs e)
         {
             try
@@ -336,9 +317,9 @@ namespace Dplus_Desktop
                 logger.Log(LogLevel.INFO, "Uploader", "Upload Failed.\n");
             }
         }
-        private void DownloadFiles_Button_Click(object sender, EventArgs e)
+        private async void DownloadFiles_Button_Click(object sender, EventArgs e)
         {
-            clusters[Clusters_Box.Text].DownloadFiles();
+            await clusters[Clusters_Box.Text].DownloadFiles();
         }
         private void ManualRecompile_Button_Click(object sender, EventArgs e)
         {
