@@ -45,7 +45,7 @@
             ManualRecompile_Button = new Button();
             SourceCode_GroupBox = new GroupBox();
             BackupFirst_Box = new CheckBox();
-            AutoRecompile_Button1 = new Button();
+            AutoRecompile_Button = new Button();
             CreateJSONfiles_Button = new Button();
             DistributeRuntimeFiles_Button = new Button();
             RaspberryPi_GroupBox = new GroupBox();
@@ -210,7 +210,7 @@
             // SourceCode_GroupBox
             // 
             SourceCode_GroupBox.Controls.Add(BackupFirst_Box);
-            SourceCode_GroupBox.Controls.Add(AutoRecompile_Button1);
+            SourceCode_GroupBox.Controls.Add(AutoRecompile_Button);
             SourceCode_GroupBox.Controls.Add(CreateJSONfiles_Button);
             SourceCode_GroupBox.Controls.Add(DistributeRuntimeFiles_Button);
             SourceCode_GroupBox.Controls.Add(ManualRecompile_Button);
@@ -232,15 +232,15 @@
             BackupFirst_Box.Text = "Backup";
             BackupFirst_Box.UseVisualStyleBackColor = true;
             // 
-            // AutoRecompile_Button1
+            // AutoRecompile_Button
             // 
-            AutoRecompile_Button1.Location = new Point(168, 22);
-            AutoRecompile_Button1.Name = "AutoRecompile_Button1";
-            AutoRecompile_Button1.Size = new Size(75, 23);
-            AutoRecompile_Button1.TabIndex = 12;
-            AutoRecompile_Button1.Text = "Auto";
-            AutoRecompile_Button1.UseVisualStyleBackColor = true;
-            AutoRecompile_Button1.Click += AutoRecompile_Button1_Click;
+            AutoRecompile_Button.Location = new Point(168, 22);
+            AutoRecompile_Button.Name = "AutoRecompile_Button";
+            AutoRecompile_Button.Size = new Size(75, 23);
+            AutoRecompile_Button.TabIndex = 12;
+            AutoRecompile_Button.Text = "Auto";
+            AutoRecompile_Button.UseVisualStyleBackColor = true;
+            AutoRecompile_Button.Click += AutoRecompile_Button1_Click;
             // 
             // CreateJSONfiles_Button
             // 
@@ -509,7 +509,7 @@
         private ColumnHeader IPAddress;
         private ColumnHeader columnHeader1;
         private Button CreateJSONfiles_Button;
-        private Button AutoRecompile_Button1;
+        private Button AutoRecompile_Button;
         private CheckBox BackupFirst_Box;
         private Dplus_Desktop.WinForms.Controls.ClusterStatusDisplay.DeviceStatusStrip CurrentCluster_StatusStrip;
     }

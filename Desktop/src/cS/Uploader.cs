@@ -40,7 +40,7 @@ namespace Dplus_Desktop
             {
                 Clusters_Box.SelectedIndex = 0;
 
-                checkServiceStatus(clusters[Clusters_Box.Text]);
+                Task.Run(async () => checkServiceStatus(clusters[Clusters_Box.Text]));
 
                 UpdateManagedFiles_Boxes();
             }
@@ -51,9 +51,9 @@ namespace Dplus_Desktop
             logger.AddSource(source, color, andModules);
             logger.Log(mLogger.LogLevel.INFO, "Uploader", $"Added source '{source}' to _tbSink");
         }
-        private void LoadNodes()
+        private async Task LoadNodes()
         {
-            logger.Log(LogLevel.INFO, "Uploader", "Loading nodes for " + Clusters_Box.SelectedItem.ToString() + "\n");
+            logger.Log(LogLevel.INFO, "Uploader", "Loading nodes for '" + Clusters_Box.SelectedItem?.ToString() + "'\n");
             Device hub = Settings.All.Hubs[Clusters_Box.SelectedIndex];
 
             Nodes_Box.Items.Clear();
@@ -64,7 +64,7 @@ namespace Dplus_Desktop
                 Nodes_Box.Items.Add(item);
             }
 
-            HighlightNodes();
+            await HighlightNodes();
         }
         private void UpdateManagedFiles_Boxes()
         {
@@ -221,8 +221,9 @@ namespace Dplus_Desktop
             }
         }
 
-        private void HighlightNodes()
+        private async Task HighlightNodes()
         {
+
             foreach (ListViewItem nodeItem in Nodes_Box.Items)
             {
                 Device? nodeDevice = Settings.All.Nodes.Find(d => d.Name == nodeItem.SubItems[0].Text);
@@ -230,7 +231,10 @@ namespace Dplus_Desktop
 
                 if (nodeDevice != null)
                 {
-                    ServiceStatus status = clusters[Clusters_Box.Text].CheckDeviceServiceStatus(nodeDevice);
+                    setControlablilty(false);
+                    ServiceStatus status = await clusters[Clusters_Box.Text].CheckDeviceServiceStatus(nodeDevice);
+                    setControlablilty(true);
+
                     switch (status)
                     {
                         case ServiceStatus.Active:
@@ -274,13 +278,34 @@ namespace Dplus_Desktop
                 nodeItem.BackColor = color;
             }
         }
-        private void checkServiceStatus(ClusterManager com)
+        private async Task checkServiceStatus(ClusterManager com)
         {
-            CurrentCluster_StatusStrip.UpdateStatus(com.CheckSystem());
+            setControlablilty(false);
+            CurrentCluster_StatusStrip.UpdateStatus(await com.CheckSystem());
+            setControlablilty(true);
         }
-        private void checkServiceStatus()
+        private async Task checkServiceStatus()
         {
-            CurrentCluster_StatusStrip.UpdateStatus(clusters[Clusters_Box.Text].CheckSystem());
+            setControlablilty(false);
+            CurrentCluster_StatusStrip.UpdateStatus(await clusters[Clusters_Box.Text].CheckSystem());
+            setControlablilty(true);
+        }
+
+        private void setControlablilty(bool enable)
+        {
+            Reboot_Button.Enabled = enable;
+            Shutdown_Button.Enabled = enable;
+            Upload_Button.Enabled = enable;
+            CreateJSONfiles_Button.Enabled = enable;
+            ManualRecompile_Button.Enabled = enable;
+            DistributeRuntimeFiles_Button.Enabled = enable;
+            AutoRecompile_Button.Enabled = enable;
+            BackupFirst_Box.Enabled = enable;
+            StartService_Button.Enabled = enable;
+            Download_Button.Enabled = enable;
+            StopService_Button.Enabled = enable;
+            CheckServiceStatus_Button.Enabled = enable;
+
         }
 
         #region WinformEventHandlers
@@ -290,21 +315,24 @@ namespace Dplus_Desktop
 
             logger.LogHeading(LogLevel.INFO, "Uploader", "Uploader Exiting");
         }
-        private void CheckServiceStatus_Button_Click(object sender, EventArgs e)
+        private async void CheckServiceStatus_Button_Click(object sender, EventArgs e)
         {
-            checkServiceStatus(clusters[Clusters_Box.Text]);
+            setControlablilty(false);
+            await checkServiceStatus(clusters[Clusters_Box.Text]);
+            setControlablilty(true);
         }
-        private void Upload_Button_Click(object sender, EventArgs e)
+        private async void Upload_Button_Click(object sender, EventArgs e)
         {
+            setControlablilty(false);
             try
             {
                 logger.Log(LogLevel.INFO, "Uploader", "Starting Upload Process.\n");
 
                 // Ensure connection
-                clusters[Clusters_Box.Text].CheckSSH(true);
+                await clusters[Clusters_Box.Text].CheckSSH(true);
 
                 // Upload files
-                clusters[Clusters_Box.Text].UploadFiles();
+                await clusters[Clusters_Box.Text].UploadFiles();
 
                 // Show new status in GUI
                 UpdateManagedFiles_Boxes();
@@ -316,55 +344,78 @@ namespace Dplus_Desktop
                 logger.Log(LogLevel.ERROR, "Uploader", "Error: " + ex.Message + '\n');
                 logger.Log(LogLevel.INFO, "Uploader", "Upload Failed.\n");
             }
+            finally
+            {
+                setControlablilty(true);
+            }
         }
         private async void DownloadFiles_Button_Click(object sender, EventArgs e)
         {
+            setControlablilty(false);
             await clusters[Clusters_Box.Text].DownloadFiles();
+            setControlablilty(true);
         }
-        private void ManualRecompile_Button_Click(object sender, EventArgs e)
+        private async void ManualRecompile_Button_Click(object sender, EventArgs e)
         {
-            clusters[Clusters_Box.Text].ManualRecompile(BackupFirst_Box.Checked);
+            setControlablilty(false);
+            await clusters[Clusters_Box.Text].ManualRecompile(BackupFirst_Box.Checked);
+            setControlablilty(true);
         }
-        private void AutoRecompile_Button1_Click(object sender, EventArgs e)
+        private async void AutoRecompile_Button1_Click(object sender, EventArgs e)
         {
+            setControlablilty(false);
 
-            clusters[Clusters_Box.Text].AutoRecompile(BackupFirst_Box.Checked);
-            clusters[Clusters_Box.Text].DistributeRuntimeFiles();
+            await clusters[Clusters_Box.Text].AutoRecompile(BackupFirst_Box.Checked);
+            await clusters[Clusters_Box.Text].DistributeRuntimeFiles();
+
+            setControlablilty(true);
 
             UpdateManagedFiles_Boxes();
         }
-        private void DistributeRuntimeFiles_Button_Click(object sender, EventArgs e)
+        private async void DistributeRuntimeFiles_Button_Click(object sender, EventArgs e)
         {
-            clusters[Clusters_Box.Text].DistributeRuntimeFiles();
+            setControlablilty(false);
+            await clusters[Clusters_Box.Text].DistributeRuntimeFiles();
+            setControlablilty(true);
         }
-        private void RunMain_Button_Click(object sender, EventArgs e)
+        private async void RunMain_Button_Click(object sender, EventArgs e)
         {
-            clusters[Clusters_Box.Text].startMain();
-            CurrentCluster_StatusStrip.UpdateStatus(clusters[Clusters_Box.Text].CheckSystem());
+            setControlablilty(false);
+            await clusters[Clusters_Box.Text].startMain();
+            CurrentCluster_StatusStrip.UpdateStatus(await clusters[Clusters_Box.Text].CheckSystem());
+            setControlablilty(true);
         }
-        private void StopService_Button_Click(object sender, EventArgs e)
+        private async void StopService_Button_Click(object sender, EventArgs e)
         {
-            clusters[Clusters_Box.Text].stopMain();
+            setControlablilty(false);
+            await clusters[Clusters_Box.Text].stopMain();
 
-            CurrentCluster_StatusStrip.UpdateStatus(clusters[Clusters_Box.Text].CheckSystem());
+            CurrentCluster_StatusStrip.UpdateStatus(await clusters[Clusters_Box.Text].CheckSystem());
 
-            clusters[Clusters_Box.Text].DownloadFiles();
+            await clusters[Clusters_Box.Text].DownloadFiles();
+            setControlablilty(true);
         }
-        private void Reboot_Button_Click(object sender, EventArgs e)
+        private async void Reboot_Button_Click(object sender, EventArgs e)
         {
-            clusters[Clusters_Box.Text].RebootCluster();
+            setControlablilty(false);
+            await clusters[Clusters_Box.Text].RebootCluster();
             CurrentCluster_StatusStrip.UpdateStatus(new ClusterStatus());
+            setControlablilty(true);
         }
-        private void Shutdown_Button_Click(object sender, EventArgs e)
+        private async void Shutdown_Button_Click(object sender, EventArgs e)
         {
-            clusters[Clusters_Box.Text].ShutdownCluster();
-            CurrentCluster_StatusStrip.UpdateStatus(clusters[Clusters_Box.Text].CheckSystem());
+            setControlablilty(false);
+            await clusters[Clusters_Box.Text].ShutdownCluster();
+            CurrentCluster_StatusStrip.UpdateStatus(await clusters[Clusters_Box.Text].CheckSystem());
+            setControlablilty(true);
         }
-        private void Clusters_Box_SelectedIndexChanged(object sender, EventArgs e)
+        private async void Clusters_Box_SelectedIndexChanged(object sender, EventArgs e)
         {
-            CurrentCluster_StatusStrip.UpdateStatus(clusters[Clusters_Box.Text].CheckSystem());
+            setControlablilty(false);
+            CurrentCluster_StatusStrip.UpdateStatus(await clusters[Clusters_Box.Text].CheckSystem());
             UpdateManagedFiles_Boxes();
-            LoadNodes();
+            await LoadNodes();
+            setControlablilty(true);
         }
         private void CreateSettingsFiles_Button_Click(object sender, EventArgs e)
         {

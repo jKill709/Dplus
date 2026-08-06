@@ -37,7 +37,7 @@ namespace Dplus_Desktop
                     }
                 }
 
-            LoadManagedFiles();
+            Task.Run(async () => LoadManagedFiles());
             //checkSSHDevice(currentCluster, true);
         }
 
@@ -202,11 +202,11 @@ namespace Dplus_Desktop
             }
         }
 
-        private void LoadManagedFiles()
+        private async Task LoadManagedFiles()
         {
-            LoadSourceFiles();
-            LoadRuntimeFiles();
-            LoadModelFiles();
+            await LoadSourceFiles();
+            await LoadRuntimeFiles();
+            await LoadModelFiles();
 
             Settings.SaveSettings();
         }
@@ -316,7 +316,7 @@ namespace Dplus_Desktop
             await UploadSourceFiles();
             await UploadModelFiles();
 
-            LoadManagedFiles();
+            await LoadManagedFiles();
         }
         private async Task UploadSourceFiles()
         {
@@ -629,7 +629,7 @@ namespace Dplus_Desktop
         }
         public async Task ManualRecompile(bool backupFirst)
         {
-            stopMain();
+            await stopMain();
 
             if (backupFirst)
                 await BackupBinFiles();
@@ -639,7 +639,7 @@ namespace Dplus_Desktop
         }
         public async Task AutoRecompile(bool backupFirst)
         {
-            stopMain();
+            await stopMain();
 
             if (backupFirst)
                 await BackupBinFiles();
