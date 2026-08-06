@@ -24,7 +24,7 @@ namespace Dplus_Desktop
         {
             _hub = hub;
             _hubCom = new Communicator(hub.IPAddress, hub.Username, hub.Password);
-            _hubCom.Connect();
+            Task.Run(async () => await _hubCom.ConnectAsync());
 
             _nodes = new List<Device>();
             if ((_hubCom.IsConnected) && (nodes != null) && (nodes.Count > 0))
@@ -33,7 +33,7 @@ namespace Dplus_Desktop
                     _nodes.Add(node);
                     if (node.isActive)
                     {
-                        _hubCom.AddNodeTunnel(node.APAddress, node.Username, node.Password, true);
+                        Task.Run(async () => await _hubCom.AddNodeTunnelAsync(node.APAddress, node.Username, node.Password, true));
                     }
                 }
 
@@ -41,18 +41,18 @@ namespace Dplus_Desktop
             //checkSSHDevice(currentCluster, true);
         }
 
-        public ClusterStatus CheckSystem()
+        public async Task<ClusterStatus> CheckSystem()
         {
-            bool isConnected = CheckSSH();
+            bool isConnected = await CheckSSH();
 
             if (isConnected)
             {
-                ServiceStatus hubValue = CheckDeviceServiceStatus(_hub);
+                ServiceStatus hubValue = await CheckDeviceServiceStatus(_hub);
                 Dictionary<string, ServiceStatus> nodeValues = new Dictionary<string, ServiceStatus>();
                 foreach (Device node in _nodes)
                 {
                     if (node.isActive)
-                        nodeValues.Add(node.Name, CheckDeviceServiceStatus(node));
+                        nodeValues.Add(node.Name, await CheckDeviceServiceStatus(node));
                 }
                 return new ClusterStatus(true,
                                          nodeValues.Count,
@@ -72,7 +72,7 @@ namespace Dplus_Desktop
                                          nodeValues);
             }
         }
-        public bool CheckSSH(bool verbose = false)
+        public async Task<bool> CheckSSH(bool verbose = false)
         {
             string host = _hubCom._host;
             string username = _hubCom._username;
@@ -85,7 +85,7 @@ namespace Dplus_Desktop
 
             try
             {
-                if (_hubCom.Connect())
+                if (await _hubCom.ConnectAsync())
                 {
                     if (verbose)
                         logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Successfully connected to {host} in {sw.ElapsedMilliseconds} ms.");
@@ -122,14 +122,14 @@ namespace Dplus_Desktop
 
             return isCnctd;
         }
-        public ServiceStatus CheckDeviceServiceStatus(string deviceName)
+        public async Task<ServiceStatus> CheckDeviceServiceStatus(string deviceName)
         {
             Device? device = Settings.All.GetDeviceByName(deviceName);
             if (device == null)
                 return ServiceStatus.Error; 
-            return CheckDeviceServiceStatus(device);
+            return await CheckDeviceServiceStatus(device);
         }
-        public ServiceStatus CheckDeviceServiceStatus(Device device)
+        public async Task<ServiceStatus> CheckDeviceServiceStatus(Device device)
         {
             string serviceName;
             bool isHub;
@@ -149,16 +149,16 @@ namespace Dplus_Desktop
             try
             {
                 if (!isHub)
-                    if (!_hubCom.PingNode(device.APAddress))
+                    if (!await _hubCom.PingNodeAsync(device.APAddress))
                         return ServiceStatus.Error;
 
                 string result = "";
                 try
                 {
                     if (isHub)
-                        result = _hubCom.ExecuteHubCommand($"systemctl is-active {serviceName}");
+                        result = await _hubCom.ExecuteHubCommandAsync($"systemctl is-active {serviceName}");
                     else
-                        result = _hubCom.ExecuteNodeCommand($"systemctl is-active {serviceName}", device.APAddress, device.Username).Trim();
+                        result = await _hubCom.ExecuteNodeCommandAsync($"systemctl is-active {serviceName}", device.APAddress, device.Username);
                 }
                 catch (Exception ex)
                 {
@@ -210,7 +210,7 @@ namespace Dplus_Desktop
 
             Settings.SaveSettings();
         }
-        private void LoadSourceFiles()
+        private async Task LoadSourceFiles()
         {
             foreach (SourceFile file in Settings.All.SourceFiles)
             {
@@ -223,8 +223,8 @@ namespace Dplus_Desktop
 
                 if (_hubCom.IsConnected)
                 {
-                    if (_hubCom.HubFileExists(remotePath))
-                        file.LastUploadTime = _hubCom.HubFileLastModified(remotePath);
+                    if (await _hubCom.HubFileExists(remotePath))
+                        file.LastUploadTime = await _hubCom.HubFileLastModified(remotePath);
                     else
                         file.LastUploadTime = DateTime.MinValue;
                 }
@@ -235,7 +235,7 @@ namespace Dplus_Desktop
                     file.LastUploadTime = DateTime.MinValue;
             }
         }
-        private void LoadRuntimeFiles()
+        private async Task LoadRuntimeFiles()
         {
             if (_hubCom.IsConnected)
             {
@@ -248,13 +248,13 @@ namespace Dplus_Desktop
                         {
                             file.LastSourceChangeTime = File.GetLastWriteTime("C:\\Users\\jerem\\OneDrive\\Documents\\Projects\\Programming\\apps\\Dplus\\Desktop\\managerSettings.json");
                             file.LastCompliedTime = File.GetLastWriteTime(Settings.All.SourceFilesDirectory + "hubSettings.json");
-                            file.LastPushedTime = _hubCom.HubFileLastModified("/home/camcpp/src/hubSettings.json");
+                            file.LastPushedTime = await _hubCom.HubFileLastModified("/home/camcpp/src/hubSettings.json");
                         }
                         else if (file.FileName == "nodeSettings.json")
                         {
                             file.LastSourceChangeTime = File.GetLastWriteTime("C:\\Users\\jerem\\OneDrive\\Documents\\Projects\\Programming\\apps\\Dplus\\Desktop\\managerSettings.json");
                             file.LastCompliedTime = File.GetLastWriteTime(Settings.All.SourceFilesDirectory + "Node1Settings.json");
-                            file.LastPushedTime = _hubCom.NodeFileLastModified("/home/camcpp/src/nodeSettings.json", "10.0.0.11");
+                            file.LastPushedTime = await _hubCom.NodeFileLastModified("/home/camcpp/src/nodeSettings.json", _nodes.First().APAddress);
                         }
                     }
                     else
@@ -263,8 +263,8 @@ namespace Dplus_Desktop
 
                         if (!file.IsForNode)
                         {
-                            file.LastCompliedTime = _hubCom.HubFileLastModified("/home/camcpp/hub");
-                            file.LastPushedTime = _hubCom.HubFileLastModified("/home/camcpp/hub");
+                            file.LastCompliedTime = await _hubCom.HubFileLastModified("/home/camcpp/hub");
+                            file.LastPushedTime = await _hubCom.HubFileLastModified("/home/camcpp/hub");
 
                             file.LastSourceChangeTime = DateTime.MinValue;
                             foreach (SourceFile sFile in Settings.All.SourceFiles)
@@ -280,8 +280,8 @@ namespace Dplus_Desktop
                         }
                         else
                         {
-                            file.LastCompliedTime = _hubCom.HubFileLastModified("/home/camcpp/node");
-                            file.LastPushedTime = _hubCom.NodeFileLastModified("/home/camcpp/node", "10.0.0.11");
+                            file.LastCompliedTime = await _hubCom.HubFileLastModified("/home/camcpp/node");
+                            file.LastPushedTime = await _hubCom.NodeFileLastModified("/home/camcpp/node", _nodes.First().APAddress);
 
                             file.LastSourceChangeTime = DateTime.MinValue;
                             foreach (SourceFile sFile in Settings.All.SourceFiles)
@@ -299,27 +299,26 @@ namespace Dplus_Desktop
                 }
             }        
         }
-        private void LoadModelFiles()
-        {
-            
+        private async Task LoadModelFiles()
+        {            
             foreach (ModelFile file in Settings.All.Models)
             {
                 file.LastModifiedTime = File.GetLastWriteTime(Path.Combine(Settings.All.LocalModelsPath, file.ModelName));
                 if (_hubCom.IsConnected)
                 {
-                    file.LastPushTime = _hubCom.NodeFileLastModified(Path.Combine(Settings.All.RemoteModelsPath, file.ModelType, file.ModelName).Replace("\\", "/"), "10.0.0.11");
+                    file.LastPushTime = await _hubCom.NodeFileLastModified(Path.Combine(Settings.All.RemoteModelsPath, file.ModelType, file.ModelName).Replace("\\", "/"), "10.0.0.11");
                 }
             }
         }
 
-        public void UploadFiles()
+        public async Task UploadFiles()
         {
-            UploadSourceFiles();
-            UploadModelFiles();
+            await UploadSourceFiles();
+            await UploadModelFiles();
 
             LoadManagedFiles();
         }
-        private void UploadSourceFiles()
+        private async Task UploadSourceFiles()
         {
             //List<SourceFile> itemsToProcess = Settings.All.SourceFiles;
 
@@ -334,18 +333,18 @@ namespace Dplus_Desktop
                     if (file.IsForHub)
                     {
                         // Delete old file
-                        _hubCom.DeleteHubFile(remoteHubFile);
-
+                        await _hubCom.DeleteHubFile(remoteHubFile); 
+                        
                         // Upload new file
-                        _hubCom.CopyPCtoHub(localFile, remoteHubFile);
+                        await _hubCom.PCtoHubAsync(new ClusterFileIOCommand(localFile, remoteHubFile, ClusterFileIOCommandType.Upload));
                     }
                     if (file.IsForNode)
                     {
                         // Delete old file
-                        _hubCom.DeleteHubFile(remoteNodeFile);
+                        await _hubCom.DeleteHubFile(remoteNodeFile);
 
                         // Upload new file
-                        _hubCom.CopyPCtoHub(localFile, remoteNodeFile);
+                        await _hubCom.PCtoHubAsync(new ClusterFileIOCommand(localFile, remoteNodeFile, ClusterFileIOCommandType.Upload));
                     }
 
                     // Update settings
@@ -355,7 +354,7 @@ namespace Dplus_Desktop
 
             Settings.SaveSettings();
         }
-        private void UploadModelFiles()
+        private async Task UploadModelFiles()
         {
             foreach (ModelFile file in Settings.All.Models)
             {
@@ -368,12 +367,12 @@ namespace Dplus_Desktop
 
                     try
                     {
-                        _hubCom.DeleteHubFile(remoteFile);
-                        _hubCom.CopyPCtoHub(localFile, remoteFile);
+                        await _hubCom.DeleteHubFile(remoteFile);
+                        await _hubCom.PCtoHubAsync(new ClusterFileIOCommand(localFile, remoteFile, ClusterFileIOCommandType.Upload));
                         foreach (Device node in _nodes)
                         {
-                            _hubCom.DeleteNodeFile(remoteFile, node.APAddress);
-                            _hubCom.CopyHubToNode(remoteFile, remoteFile, node.APAddress, node.Username);
+                            await _hubCom.DeleteNodeFile(remoteFile, node.APAddress);
+                            await _hubCom.CopyHubToNode(remoteFile, remoteFile, node.APAddress, node.Username);
                         }
 
                         file.LastPushTime = DateTime.Now;
@@ -408,8 +407,9 @@ namespace Dplus_Desktop
             string HubSettingsStartingPath = "/home/camcpp/src/hubSettings.json";
             string baseLocalLogDir = Settings.All.LocalLogPath;
             string HubCalibrationSettingsFile = Path.Combine(baseLocalLogDir, _hub.Name, "hubCalibrationSettings.json");
+            ClusterFileIOCommand command = new ClusterFileIOCommand(HubSettingsStartingPath.Trim(), HubCalibrationSettingsFile, ClusterFileIOCommandType.Download);
 
-            if (await _hubCom.CopyHubToPCAsync(HubSettingsStartingPath.Trim(), HubCalibrationSettingsFile, false))
+            if ((await _hubCom.PCtoHubAsync(command)).MainProcedureSucceeded)
             {
                 int newDataPoints = await Settings.MergeNewCalibrationData(HubCalibrationSettingsFile);
                 if (newDataPoints > 0)
@@ -427,14 +427,16 @@ namespace Dplus_Desktop
         }
         private async Task<bool> DownloadHubFiles()
         {
-            List<Task<bool>> hubTasks = new List<Task<bool>>();
+            //List<Task<bool>> hubTasks = new List<Task<bool>>();
+            List<bool> hubResults = new List<bool>();
 
             // Logs
             string remoteLogDir = Settings.All.RemoteLogPath;
             string baseLocalLogDir = Settings.All.LocalLogPath;
 
             string baseLocalHubLogDir = Path.Combine(baseLocalLogDir, _hub.Name, "Logs");
-            hubTasks.Add(RetrieveHubDirectory(baseLocalHubLogDir, remoteLogDir, "log"));
+            //hubTasks.Add(RetrieveHubDirectory(baseLocalHubLogDir, remoteLogDir, "log"));
+            hubResults.Add(await RetrieveHubDirectory(baseLocalHubLogDir, remoteLogDir, "log"));
 
             // Reconstructions
             string remoteReconstructionsDir = Settings.All.RemoteReconstructionsPath;
@@ -442,17 +444,19 @@ namespace Dplus_Desktop
             string localHubReconstructionsDir = Path.Combine(baseLocalReconstructionDir, _hub.Name, "Reconstructions");
             if (!Directory.Exists(localHubReconstructionsDir))
                 Directory.CreateDirectory(localHubReconstructionsDir);
-            hubTasks.Add(RetrieveHubDirectory(localHubReconstructionsDir, remoteReconstructionsDir, "json"));
+            //hubTasks.Add(RetrieveHubDirectory(localHubReconstructionsDir, remoteReconstructionsDir, "json"));
+            hubResults.Add(await RetrieveHubDirectory(localHubReconstructionsDir, remoteReconstructionsDir, "json"));
 
             // Calibration
-            hubTasks.Add(DownloadCalibration());
+            //hubTasks.Add(DownloadCalibration());
+            hubResults.Add(await DownloadCalibration());
 
             // Wrap-up
-            await Task.WhenAll(hubTasks);
+            //await Task.WhenAll(hubTasks);
 
-            foreach (Task<bool> task in hubTasks)
+            foreach (bool task in hubResults)
             {
-                if (!await task)
+                if (!task)
                     return false;
             }
             return true;
@@ -460,7 +464,8 @@ namespace Dplus_Desktop
 
         private async Task<bool> DownloadNodeFiles(Device node)
         {
-            List<Task<bool>> nodeTasks = new List<Task<bool>>();
+            //List<Task<bool>> nodeResults = new List<Task<bool>>();
+            List<bool> nodeResults = new List<bool>();
 
             string remoteLogDir = Settings.All.RemoteLogPath;
             string baseLocalLogDir = Settings.All.LocalLogPath;
@@ -469,7 +474,8 @@ namespace Dplus_Desktop
             string deviceLocalLogDir = Path.Combine(baseLocalLogDir, node.Name, "Logs");
             if (!Directory.Exists(deviceLocalLogDir))
                 Directory.CreateDirectory(deviceLocalLogDir);
-            nodeTasks.Add(RetrieveNodeDirectory(deviceLocalLogDir, remoteLogDir, node, "log"));
+            //nodeResults.Add(RetrieveNodeDirectory(deviceLocalLogDir, remoteLogDir, node, "log"));
+            nodeResults.Add(await RetrieveNodeDirectory(deviceLocalLogDir, remoteLogDir, node, "log"));
 
             // Captures
             string[] captureTypes = new string[] { "Captures", "Charuco", "Chessboard", "Face", "Motion", "Preprocessed", "Startup", "YoloObject", "YoloPose" };
@@ -487,16 +493,17 @@ namespace Dplus_Desktop
                 if (!Directory.Exists(localTypeDir))
                     Directory.CreateDirectory(localTypeDir);
 
-                string[] remoteFiles = _hubCom.GetListOfNodeFiles(remoteTypeDir, "png", node.APAddress, node.Username);
-                nodeTasks.Add(RetrieveNodeDirectory(localTypeDir, remoteTypeDir, node, "png"));
+                List<LinuxFileInfo> remoteFiles = await _hubCom.GetListOfNodeFiles(remoteTypeDir, "png", node.APAddress, node.Username);
+                //nodeResults.Add(RetrieveNodeDirectory(localTypeDir, remoteTypeDir, node, "png"));
+                nodeResults.Add(await RetrieveNodeDirectory(localTypeDir, remoteTypeDir, node, "png"));
             }
 
             // Wrap-up
-            await Task.WhenAll(nodeTasks);
+            //await Task.WhenAll(nodeResults);
 
-            foreach (Task<bool> task in nodeTasks)
+            foreach (bool task in nodeResults)
             {
-                if (!await task)
+                if (!task)
                     return false;
             }
             return true;
@@ -552,9 +559,9 @@ namespace Dplus_Desktop
         private async Task<bool> RetrieveHubDirectory(string baseLocalDir, string remoteDir, string fileExtension)
         {
             bool hadErrors = false;
-            string[] remoteFiles = _hubCom.GetListOfHubFiles(remoteDir, fileExtension);
+            List<LinuxFileInfo> remoteFiles = await _hubCom.GetListOfHubFiles(remoteDir, fileExtension);
 
-            if (remoteFiles.Length == 0)
+            if (remoteFiles.Count == 0)
             {
                 logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"No .{fileExtension} files found on {_hub.Name}.");
             }
@@ -563,9 +570,18 @@ namespace Dplus_Desktop
                 if (!Directory.Exists(baseLocalDir))
                     Directory.CreateDirectory(baseLocalDir);
 
-                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Found {remoteFiles.Length} .{fileExtension} files on {_hub.Name}.");
+                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Found {remoteFiles.Count} .{fileExtension} files on {_hub.Name}.");
+                
+                List<ClusterFileIOCommand> commands = new List<ClusterFileIOCommand>();
+                foreach (LinuxFileInfo file in remoteFiles)
+                {
+                    if (file.Name.EndsWith(_hub.Name + "_" + DateTime.Now.ToString("yyyy-MM-dd") + ".log"))
+                        commands.Add(new ClusterFileIOCommand(file.Name, baseLocalDir, ClusterFileIOCommandType.Download));
+                    else
+                        commands.Add(new ClusterFileIOCommand(file.Name, baseLocalDir, ClusterFileIOCommandType.Download, false, false, true, false));
+                }
 
-                await _hubCom.CopyBatchHubToPCAsync(new List<string>(remoteFiles), baseLocalDir, _hub.Name + "_" + DateTime.Now.ToString("yyyy-MM-dd") + ".log");
+                await _hubCom.PCtoHubAsync(commands);
             }
 
             return hadErrors;
@@ -574,9 +590,9 @@ namespace Dplus_Desktop
         private async Task<bool> RetrieveNodeDirectory(string baseLocalDir, string remoteDir, Device node, string fileExtension)
         {
             bool hadErrors = false;
-            string[] remoteFiles = _hubCom.GetListOfNodeFiles(remoteDir, fileExtension, node.APAddress, node.Username);
+            List<LinuxFileInfo> remoteFiles = await _hubCom.GetListOfNodeFiles(remoteDir, fileExtension, node.APAddress, node.Username);
 
-            if (remoteFiles.Length == 0)
+            if (remoteFiles.Count == 0)
             {
                 logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"No .{fileExtension} files found on {node.Name}.");
             }
@@ -585,43 +601,51 @@ namespace Dplus_Desktop
                 if (!Directory.Exists(baseLocalDir))
                     Directory.CreateDirectory(baseLocalDir);
 
-                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Found {remoteFiles.Length} .{fileExtension} files on {node.Name}.");
+                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Found {remoteFiles.Count} .{fileExtension} files on {node.Name}.");
 
-                await _hubCom.CopyBatchNodeToPCAsync(new List<string>(remoteFiles), baseLocalDir, node.APAddress, node.Name + '_' + DateTime.Now.ToString("yyyy-MM-dd") + ".log");
+                List<ClusterFileIOCommand> commands = new List<ClusterFileIOCommand>();
+                foreach (LinuxFileInfo file in remoteFiles)
+                {
+                    if (file.Name.EndsWith(node.Name + "_" + DateTime.Now.ToString("yyyy-MM-dd") + ".log"))
+                        commands.Add(new ClusterFileIOCommand(file.Name, baseLocalDir, ClusterFileIOCommandType.Download));
+                    else
+                        commands.Add(new ClusterFileIOCommand(file.Name, baseLocalDir, ClusterFileIOCommandType.Download, false, false, true, false));
+                }
+                await _hubCom.PCtoNodeAsync(commands, node.APAddress);
             }
 
             return hadErrors;
 
         }
 
-        private void BackupBinFiles()
+        private async Task BackupBinFiles()
         {
             logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Backuping up previous bin files");
-            _hubCom.DeleteHubFile("/home/camcpp/previous_hub");
-            _hubCom.MoveHubFile("/home/camcpp/hub", "/home/camcpp/previous_hub");
-            _hubCom.DeleteHubFile("/home/camcpp/previous_node");
-            _hubCom.MoveHubFile("/home/camcpp/node", "/home/camcpp/previous_node");
+            await _hubCom.DeleteHubFile("/home/camcpp/previous_hub");
+            await _hubCom.MoveHubFile("/home/camcpp/hub", "/home/camcpp/previous_hub");
+            await _hubCom.DeleteHubFile("/home/camcpp/previous_node");
+            await _hubCom.MoveHubFile("/home/camcpp/node", "/home/camcpp/previous_node");
             logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Bin files backed up");
         }
-        public void ManualRecompile(bool backupFirst)
+        public async Task ManualRecompile(bool backupFirst)
         {
             stopMain();
 
             if (backupFirst)
-                BackupBinFiles();
+                await BackupBinFiles();
 
             logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Ready to recompile manually.  Please Run:");
             logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "time make -C /home/camcpp/build");
         }
-        public void AutoRecompile(bool backupFirst)
+        public async Task AutoRecompile(bool backupFirst)
         {
             stopMain();
 
             if (backupFirst)
-                BackupBinFiles();
+                await BackupBinFiles();
 
             logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Recompiling...");
-            _hubCom.ExecuteHubCommand("make -C /home/camcpp/build");
+            await _hubCom.ExecuteHubCommandAsync("make -C /home/camcpp/build");
             logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Recompilation Complete");
         }
         public void CreateSettingsFiles()
@@ -663,13 +687,14 @@ namespace Dplus_Desktop
             }
             logger.Log(mLogger.LogLevel.INFO, "Uploader", "Settings files creation complete.");
         }
-        public void DistributeRuntimeFiles()
+        public async Task DistributeRuntimeFiles()  // Needs more asyncing
         {
             logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Distributing Runtime files");
             //  Copy Hub's settings file
             string hubSettingsStartingPath = Settings.All.SourceFilesDirectory + "hubSettings.json";
             string hubSettingsEndingPath = "/home/camcpp/src/hubSettings.json";
-            _hubCom.CopyPCtoHub(hubSettingsStartingPath, hubSettingsEndingPath, false);
+
+            await _hubCom.PCtoHubAsync(new ClusterFileIOCommand(hubSettingsEndingPath, hubSettingsStartingPath, ClusterFileIOCommandType.Upload));
 
             //  Copy binary and settings file to each Node
             string nodeBinFile = "/home/camcpp/node";
@@ -678,72 +703,72 @@ namespace Dplus_Desktop
                 if (node.isActive)
                 {
                     string nodeSettingsStartingPath = Settings.All.SourceFilesDirectory + $"{node.Name}Settings.json";
-                    _hubCom.CopyHubToNode(nodeBinFile, nodeBinFile, node.APAddress, node.Username);
-                    _hubCom.CopyPCtoNode(nodeSettingsStartingPath, nodeSettingsEndingPath, node.APAddress, false);
+                    await _hubCom.CopyHubToNode(nodeBinFile, nodeBinFile, node.APAddress, node.Username);
+                    await _hubCom.PCtoNodeAsync(new ClusterFileIOCommand(nodeSettingsEndingPath, nodeSettingsStartingPath, ClusterFileIOCommandType.Upload), node.APAddress, false);
                 }
 
             logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Runtime File Distribution Complete");
         }
 
-        public void startMain()
+        public async Task startMain()
         {
-            _hubCom.ExecuteHubCommand("sudo systemctl start hub.service");
+            await _hubCom.ExecuteHubCommandAsync("sudo systemctl start hub.service");
             logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Starting service daemon on {_hub.Name}");
         
             foreach (Device node in _nodes)
             {
-                _hubCom.ExecuteNodeCommand($"sudo systemctl start node.service", node.APAddress, node.Username);
+                await _hubCom.ExecuteNodeCommandAsync($"sudo systemctl start node.service", node.APAddress, node.Username);
                 logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Starting service daemon on {node.Name}");
             }
         }
-        public void stopMain()
+        public async Task stopMain()
         {
-            _hubCom.ExecuteHubCommand("sudo systemctl stop hub.service");
+            await _hubCom.ExecuteHubCommandAsync("sudo systemctl stop hub.service");
             logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Stopping service daemon on {_hub.Name}");
 
             foreach (Device node in _nodes)
             {
-                _hubCom.ExecuteNodeCommand($"sudo systemctl stop node.service", node.APAddress, node.Username);
+                await _hubCom.ExecuteNodeCommandAsync($"sudo systemctl stop node.service", node.APAddress, node.Username);
                 logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Stopping service daemon on {node.Name}");
             }
         }
 
-        public void RebootCluster()
+        public async Task RebootCluster()
         {
             try
             {
                 // Reboot each Node
                 foreach (Device node in _nodes)
                 {
-                    _hubCom.ExecuteHubCommand($"nohup ssh -tt {node.Username}@{node.APAddress} \"sudo shutdown -r +1\" > /dev/null 2>&1 &");
+                    await _hubCom.ExecuteHubCommandAsync($"nohup ssh -tt {node.Username}@{node.APAddress} \"sudo shutdown -r +1\" > /dev/null 2>&1 &");
                     logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"{node.Name} at {node.APAddress} is rebooting.");
                 }
 
-                _hubCom.ExecuteHubCommand("sudo shutdown -r now");
+                await _hubCom.ExecuteHubCommandAsync("sudo shutdown -r now");
                 logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"{_hub.Name} is rebooting.");
 
-                _hubCom.Disconnect();
+                await _hubCom.DisconnectAsync();
             }
             catch (Exception ex)
             {
                 logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", "Error: " + ex.Message);
             }
         }
-        public void ShutdownCluster()
+        public async Task ShutdownCluster()
         {
             try
             {
                 // Shutdown each Node
                 foreach (Device node in _nodes)
                 {
-                    _hubCom.ExecuteHubCommand($"nohup ssh -tt {node.Username}@{node.APAddress} \"sudo shutdown now\" > /dev/null 2>&1 &");
+                    await _hubCom.ExecuteHubCommandAsync($"nohup ssh -tt {node.Username}@{node.APAddress} \"sudo shutdown now\" > /dev/null 2>&1 &");
                     logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"{node.Name} at {node.APAddress} is shutting down.");
                 }
-                    
-                _hubCom.ExecuteHubCommand("sudo shutdown now");
+
+                await _hubCom.ExecuteHubCommandAsync("sudo shutdown now");
                 logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"{_hub.Name} is shutting down.");
 
-                _hubCom.Disconnect();
+                await _hubCom.DisconnectAsync();
             }
             catch (Exception ex)
             {
@@ -753,13 +778,11 @@ namespace Dplus_Desktop
             }
         }
 
-        public void TestIsConnected()
+        public async Task TestIsConnected()
         {
             for (int i = 0; i < 10; i++)
             {
-                //if (_hubCom.IsConnected)  //fast
-                //if (CheckSSH())           //fast
-                if (CheckSystem().SSHConnected) //slow (150 ms?)
+                if ((await CheckSystem()).SSHConnected) //slow (150 ms?)
                     logger.Log(mLogger.LogLevel.DEBUG, "ClusterManager_IsConnected", $"Is Connected {i}");
                 else
                     logger.Log(mLogger.LogLevel.DEBUG, "ClusterManager_IsConnected", $"Is not Connected {i}");
