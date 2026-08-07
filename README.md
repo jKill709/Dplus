@@ -1,6 +1,6 @@
 # Dplus
 
-A desktop application for managing camera clusters with embedded C++ components, using MQTT for communication between hubs and nodes.
+A single board computer based, distributed computer vision system for creating 3D datasets from arbitrary 2D detection models.
 
 ## Overview
 
@@ -81,7 +81,7 @@ Open `Embedded/CamSandbox.vcxproj` in Visual Studio and build.
 
 Comprehensive documentation is available:
 
-- **Root level**: [ARCHITECTURE.md](./ARCHITECTURE.md) - Overall system architecture, data flow, MQTT messaging
+- **Root level**: [ARCHITECTURE.md](./doc/ARCHITECTURE.md) - Overall system architecture, data flow, MQTT messaging
 - **Desktop**: [README.md](./Desktop/README.md) and `doc/` directory - API reference for all public types
 - **Embedded**: [README.md](./Embedded/README.md) and `doc/` directory - Per-file documentation
 
@@ -96,7 +96,7 @@ The configuration structure is documented in the API reference under `SettingsMa
 
 ## MQTT Topics
 
-The embedded devices use MQTT for cluster-wide communication. Topics and message formats are documented in [ARCHITECTURE.md](./ARCHITECTURE.md#mqtt-messaging).
+The embedded devices use MQTT for cluster-wide communication. Topics and message formats are documented in [ARCHITECTURE.md](./doc/ARCHITECTURE.md#mqtt-messaging).
 
 ## License
 
