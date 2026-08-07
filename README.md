@@ -1,6 +1,6 @@
 # Dplus
 
-An Single Board Computer (SBC) based, distributed computer vision system for creating 3D datasets from arbitrary 2D detection models.
+A Single Board Computer (SBC) based, distributed computer vision system for creating 3D datasets from arbitrary 2D detection models.
 
 ## Overview 
 
