@@ -27,7 +27,9 @@ namespace Dplus_Desktop
 
             foreach (Device hub in Settings.All.Hubs)
             {
-                clusters.Add(hub.ClusterID, new ClusterManager(hub, Settings.All.GetNodesByClusterID(hub.ClusterID)));
+                ClusterManager cluster = new ClusterManager(hub, Settings.All.GetNodesByClusterID(hub.ClusterID));
+                clusters.Add(hub.ClusterID, cluster);
+
                 Clusters_Box.Items.Add(hub.ClusterID);
             }
 
@@ -39,8 +41,6 @@ namespace Dplus_Desktop
             else
             {
                 Clusters_Box.SelectedIndex = 0;
-
-                Task.Run(async () => checkServiceStatus(clusters[Clusters_Box.Text]));
 
                 UpdateManagedFiles_Boxes();
             }
@@ -87,6 +87,10 @@ namespace Dplus_Desktop
                 UpdateRuntimeFiles_Box();
                 UpdateModels_Box();
             }
+        }
+        private void UpdateManagedFiles_Boxes(object sender, FormClosingEventArgs e)
+        {
+            UpdateManagedFiles_Boxes();
         }
         private void UpdateSourceFiles_Box()
         {
@@ -423,5 +427,17 @@ namespace Dplus_Desktop
         }
 
         #endregion
+
+        private async void Uploader_Load(object sender, EventArgs e)
+        {
+            foreach (ClusterManager cluster in clusters.Values)
+            {
+                await cluster.ConnectAsync();
+            }
+
+            await checkServiceStatus(clusters[Clusters_Box.Text]);
+
+            UpdateManagedFiles_Boxes();
+        }
     }
 }

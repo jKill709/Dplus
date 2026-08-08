@@ -24,23 +24,31 @@ namespace Dplus_Desktop
         {
             _hub = hub;
             _hubCom = new Communicator(hub.IPAddress, hub.Username, hub.Password);
-            Task.Run(async () => await _hubCom.ConnectAsync());
 
             _nodes = new List<Device>();
-            if ((_hubCom.IsConnected) && (nodes != null) && (nodes.Count > 0))
+            if ((nodes != null) && (nodes.Count > 0))
                 foreach (Device node in nodes)
                 {
                     _nodes.Add(node);
+                }
+        }
+
+        public async Task<bool> ConnectAsync()
+        {
+            await _hubCom.ConnectAsync();
+
+            if ((_hubCom.IsConnected))
+                foreach (Device node in _nodes)
+                {
                     if (node.isActive)
                     {
-                        Task.Run(async () => await _hubCom.AddNodeTunnelAsync(node.APAddress, node.Username, node.Password, true));
+                        await _hubCom.AddNodeTunnelAsync(node.APAddress, node.Username, node.Password, true);
                     }
                 }
 
-            Task.Run(async () => LoadManagedFiles());
-            //checkSSHDevice(currentCluster, true);
+            await LoadManagedFiles();
+            return await CheckSSH(true);
         }
-
         public async Task<ClusterStatus> CheckSystem()
         {
             bool isConnected = await CheckSSH();

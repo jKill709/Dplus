@@ -454,6 +454,7 @@
             Name = "Uploader";
             Text = "Upload files to camcpp";
             FormClosing += Uploader_FormClosing;
+            Load += Uploader_Load;
             SystemCTLService_GroupBox.ResumeLayout(false);
             SourceCode_GroupBox.ResumeLayout(false);
             SourceCode_GroupBox.PerformLayout();
