@@ -8,6 +8,9 @@ namespace Dplus_Desktop
     // Manages one Dplus_Embedded cluster (1 Hub and many Nodes) using a jCommunicator.Communicator.  Provides Dplus specific functionality.
     class ClusterManager
     {
+        public event EventHandler<EventArgs>? Connected;
+        public event EventHandler<EventArgs>? Disconnected;
+
         // The Hub for this cluster
         public Device _hub { get; }
 
@@ -31,6 +34,18 @@ namespace Dplus_Desktop
                 {
                     _nodes.Add(node);
                 }
+
+            _hubCom.Connected += hubCom_Connected;
+            _hubCom.Disconnected += hubCom_Disconnected;
+        }
+
+        private void hubCom_Disconnected(object? sender, EventArgs e)
+        {
+            Disconnected?.Invoke(sender, e);
+        }
+        private void hubCom_Connected(object? sender, EventArgs e)
+        {
+            Connected?.Invoke(this, e);
         }
 
         public async Task<bool> ConnectAsync()
