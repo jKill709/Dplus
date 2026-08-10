@@ -598,10 +598,11 @@ namespace Dplus_Desktop
                 List<ClusterFileIOCommand> commands = new List<ClusterFileIOCommand>();
                 foreach (LinuxFileInfo file in remoteFiles)
                 {
+                    string localFile = baseLocalDir + '\\' + file.Name.Split('/').Last();
                     if (file.Name.EndsWith(_hub.Name + "_" + DateTime.Now.ToString("yyyy-MM-dd") + ".log"))
-                        commands.Add(new ClusterFileIOCommand(file.Name, baseLocalDir, ClusterFileIOCommandType.Download));
+                        commands.Add(new ClusterFileIOCommand(file.Name, localFile, ClusterFileIOCommandType.Download));
                     else
-                        commands.Add(new ClusterFileIOCommand(file.Name, baseLocalDir, ClusterFileIOCommandType.Download, false, false, true, false));
+                        commands.Add(new ClusterFileIOCommand(file.Name, localFile, ClusterFileIOCommandType.Download, false, false, true, false));
                 }
 
                 await _hubCom.PCtoHubAsync(commands);
@@ -629,10 +630,11 @@ namespace Dplus_Desktop
                 List<ClusterFileIOCommand> commands = new List<ClusterFileIOCommand>();
                 foreach (LinuxFileInfo file in remoteFiles)
                 {
+                    string localFile = baseLocalDir + '\\' + file.Name.Split('/').Last();
                     if (file.Name.EndsWith(node.Name + "_" + DateTime.Now.ToString("yyyy-MM-dd") + ".log"))
-                        commands.Add(new ClusterFileIOCommand(file.Name, baseLocalDir, ClusterFileIOCommandType.Download));
+                        commands.Add(new ClusterFileIOCommand(file.Name, localFile, ClusterFileIOCommandType.Download));
                     else
-                        commands.Add(new ClusterFileIOCommand(file.Name, baseLocalDir, ClusterFileIOCommandType.Download, false, false, true, false));
+                        commands.Add(new ClusterFileIOCommand(file.Name, localFile, ClusterFileIOCommandType.Download, false, false, true, false));
                 }
                 await _hubCom.PCtoNodeAsync(commands, node.APAddress);
             }

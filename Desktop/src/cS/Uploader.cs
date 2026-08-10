@@ -29,6 +29,8 @@ namespace Dplus_Desktop
             {
                 ClusterManager cluster = new ClusterManager(hub, Settings.All.GetNodesByClusterID(hub.ClusterID));
                 clusters.Add(hub.ClusterID, cluster);
+                cluster.Connected += UpdateManagedFiles_Boxes;
+                cluster.Disconnected += UpdateManagedFiles_Boxes;
 
                 Clusters_Box.Items.Add(hub.ClusterID);
             }
@@ -88,7 +90,11 @@ namespace Dplus_Desktop
                 UpdateModels_Box();
             }
         }
-        private void UpdateManagedFiles_Boxes(object sender, FormClosingEventArgs e)
+        private void UpdateManagedFiles_Boxes(object? sender, FormClosingEventArgs e)
+        {
+            UpdateManagedFiles_Boxes();
+        }
+        public void UpdateManagedFiles_Boxes(object? sender, EventArgs e)
         {
             UpdateManagedFiles_Boxes();
         }
@@ -425,7 +431,6 @@ namespace Dplus_Desktop
         {
             clusters[Clusters_Box.Text].CreateSettingsFiles();
         }
-
         #endregion
 
         private async void Uploader_Load(object sender, EventArgs e)
