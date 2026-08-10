@@ -72,19 +72,11 @@ namespace Dplus_Desktop
         {
             if (Settings.isLoaded == false)
             {
-                Upload_Button.Enabled = false;
-                Reboot_Button.Enabled = false;
-                Shutdown_Button.Enabled = false;
-
-                MessageBox.Show("Settings not loaded. Please configure settings first.");
+                MessageBox.Show("Settings not loaded. Please configure settings file.");
                 return;
             }
             else
             {
-                Upload_Button.Enabled = true;
-                Reboot_Button.Enabled = true;
-                Shutdown_Button.Enabled = true;
-
                 UpdateSourceFiles_Box();
                 UpdateRuntimeFiles_Box();
                 UpdateModels_Box();
