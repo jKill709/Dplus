@@ -293,6 +293,7 @@
             CurrentCluster_StatusStrip.Name = "CurrentCluster_StatusStrip";
             CurrentCluster_StatusStrip.Size = new Size(342, 31);
             CurrentCluster_StatusStrip.TabIndex = 18;
+            CurrentCluster_StatusStrip.DoubleClick += CheckServiceStatus_Button_Click;
             // 
             // ModelFiles_Box
             // 
