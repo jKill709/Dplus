@@ -353,21 +353,15 @@ namespace Dplus_Desktop
                     string remoteHubFile = Path.Combine(Settings.All.UploadDirectory, "hub/", file.FileName).Replace("\\", "/"); // normalize to Linux paths
                     string remoteNodeFile = Path.Combine(Settings.All.UploadDirectory, "node/", file.FileName).Replace("\\", "/"); // normalize to Linux paths
 
-                    if (file.IsForHub)
+                    if (file.LastModifiedTime > file.LastUploadTime)
                     {
-                        // Delete old file
-                        await _hubCom.DeleteHubFile(remoteHubFile); 
+                        if (file.IsForHub)
+                            await _hubCom.PCtoHubAsync(new ClusterFileIOCommand(localFile, remoteHubFile, ClusterFileIOCommandType.Upload));
                         
-                        // Upload new file
-                        await _hubCom.PCtoHubAsync(new ClusterFileIOCommand(localFile, remoteHubFile, ClusterFileIOCommandType.Upload));
-                    }
-                    if (file.IsForNode)
-                    {
-                        // Delete old file
-                        await _hubCom.DeleteHubFile(remoteNodeFile);
-
-                        // Upload new file
-                        await _hubCom.PCtoHubAsync(new ClusterFileIOCommand(localFile, remoteNodeFile, ClusterFileIOCommandType.Upload));
+                    
+                        if (file.IsForNode)
+                            await _hubCom.PCtoHubAsync(new ClusterFileIOCommand(localFile, remoteNodeFile, ClusterFileIOCommandType.Upload));
+                        
                     }
 
                     // Update settings
