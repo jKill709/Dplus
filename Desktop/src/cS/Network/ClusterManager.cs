@@ -13,6 +13,7 @@ namespace Dplus_Desktop
 
         // The Hub for this cluster
         public Device _hub { get; }
+        public string Name { get { return $"ClusterManager({_hub.ClusterID})"; } }
 
         //The Communicator Object for this cluster
         Communicator _hubCom;
@@ -25,10 +26,10 @@ namespace Dplus_Desktop
 
         public ClusterManager(Device hub, List<Device> nodes)
         {
-            logger.AddSource("ClusterManager");
-            logger.LogHeading(LogLevel.INFO, "ClusterManager", $"ClusterManager starting for {hub.ClusterID}.");
-
             _hub = hub;
+            logger.AddSource(Name);
+            logger.LogHeading(LogLevel.INFO, Name, "ClusterManager starting");
+
             _hubCom = new Communicator(hub.IPAddress, hub.Username, hub.Password);
 
             _nodes = nodes;
@@ -103,7 +104,7 @@ namespace Dplus_Desktop
             string username = _hubCom._username;
 
             if (verbose)
-                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Checking SSH connection to device {host} as {username}...");
+                logger.Log(mLogger.LogLevel.INFO, Name, $"Checking SSH connection to device {host} as {username}...");
 
             var sw = System.Diagnostics.Stopwatch.StartNew();
             bool isCnctd = false;
@@ -113,36 +114,36 @@ namespace Dplus_Desktop
                 if (await _hubCom.ConnectAsync())
                 {
                     if (verbose)
-                        logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Successfully connected to {host} in {sw.ElapsedMilliseconds} ms.");
+                        logger.Log(mLogger.LogLevel.INFO, Name, $"Successfully connected to {host} in {sw.ElapsedMilliseconds} ms.");
                     isCnctd = true;
                 }
                 else
                 {
-                    logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Failed to connect to {host} without error.");
+                    logger.Log(mLogger.LogLevel.ERROR, Name, $"Failed to connect to {host} without error.");
                 }
             }
             catch (Renci.SshNet.Common.SshAuthenticationException authEx)
             {
-                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Authentication failed for {username}@{host}: {authEx.Message}");
+                logger.Log(mLogger.LogLevel.ERROR, Name, $"Authentication failed for {username}@{host}: {authEx.Message}");
             }
             catch (Renci.SshNet.Common.SshConnectionException connEx)
             {
-                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Connection error to {host}: {connEx.Message}");
+                logger.Log(mLogger.LogLevel.ERROR, Name, $"Connection error to {host}: {connEx.Message}");
             }
             catch (System.Net.Sockets.SocketException sockEx)
             {
-                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Socket error while connecting to {host}: {sockEx.Message}");
+                logger.Log(mLogger.LogLevel.ERROR, Name, $"Socket error while connecting to {host}: {sockEx.Message}");
             }
             catch (Exception ex)
             {
-                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Unexpected error for {host}: {ex.GetType().Name} - {ex.Message}");
+                logger.Log(mLogger.LogLevel.ERROR, Name, $"Unexpected error for {host}: {ex.GetType().Name} - {ex.Message}");
             }
             finally
             {
                 sw.Stop();
 
                 if (verbose)
-                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Total connection attempt time for {host}: {sw.ElapsedMilliseconds} ms.");
+                    logger.Log(mLogger.LogLevel.INFO, Name, $"Total connection attempt time for {host}: {sw.ElapsedMilliseconds} ms.");
             }
 
             return isCnctd;
@@ -187,9 +188,9 @@ namespace Dplus_Desktop
                 }
                 catch (Exception ex)
                 {
-                    logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Error checking service status on device '{device.Name}' ({device.APAddress}): {ex.Message}");
+                    logger.Log(mLogger.LogLevel.ERROR, Name, $"Error checking service status on device '{device.Name}' ({device.APAddress}): {ex.Message}");
                     if (ex.InnerException != null)
-                        logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Inner exception: {ex.InnerException.Message}");
+                        logger.Log(mLogger.LogLevel.ERROR, Name, $"Inner exception: {ex.InnerException.Message}");
 
                     result = "failed";
                 }
@@ -212,17 +213,17 @@ namespace Dplus_Desktop
                         return ServiceStatus.Deactivating;
 
                     default:
-                        logger.Log(mLogger.LogLevel.WARN, "ClusterManager", $"Unknown service state '{result}' for device '{device.Name}'.");
+                        logger.Log(mLogger.LogLevel.WARN, Name, $"Unknown service state '{result}' for device '{device.Name}'.");
                         return ServiceStatus.Error;
                 
                 }
             }
             catch (Exception ex)
             {
-                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Unhandled error while processing device '{device.Name}': {ex.Message}");
+                logger.Log(mLogger.LogLevel.ERROR, Name, $"Unhandled error while processing device '{device.Name}': {ex.Message}");
                 if (ex.InnerException != null)
-                    logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Inner exception: {ex.InnerException.Message}");
-                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Stack Trace:{ex.StackTrace}");
+                    logger.Log(mLogger.LogLevel.ERROR, Name, $"Inner exception: {ex.InnerException.Message}");
+                logger.Log(mLogger.LogLevel.ERROR, Name, $"Stack Trace:{ex.StackTrace}");
                 return ServiceStatus.Error;
             }
         }
@@ -395,11 +396,11 @@ namespace Dplus_Desktop
                         }
 
                         file.LastPushTime = DateTime.Now;
-                        logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Uploaded '{localFile}' → '{remoteFile}' to all nodes");
+                        logger.Log(mLogger.LogLevel.INFO, Name, $"Uploaded '{localFile}' → '{remoteFile}' to all nodes");
                     }
                     catch (Exception ex)
                     {
-                        logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", $"Upload failed for {file.ModelName} on device {_hubCom._host}: {ex.Message}");
+                        logger.Log(mLogger.LogLevel.ERROR, Name, $"Upload failed for {file.ModelName} on device {_hubCom._host}: {ex.Message}");
                     }
 
                 }            
@@ -419,7 +420,7 @@ namespace Dplus_Desktop
 
             await Task.WhenAll(downloadTasks);
 
-            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Download process completed.");
+            logger.Log(mLogger.LogLevel.INFO, Name, "Download process completed.");
         }
         private async Task<bool> DownloadCalibration()
         {
@@ -432,15 +433,15 @@ namespace Dplus_Desktop
             {
                 int newDataPoints = await Settings.MergeNewCalibrationData(HubCalibrationSettingsFile);
                 if (newDataPoints > 0)
-                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager_DownloadCalibration", $"Calibration checked.  {newDataPoints} new data points integrated.");
+                    logger.Log(mLogger.LogLevel.INFO, Name + "_DownloadCalibration", $"Calibration checked.  {newDataPoints} new data points integrated.");
                 else
-                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager_DownloadCalibration", "Calibration checked.  No new data.");
+                    logger.Log(mLogger.LogLevel.INFO, Name + "_DownloadCalibration", "Calibration checked.  No new data.");
 
                 return true;
             }
             else
             {
-                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager_DownloadCalibration", $"[{_hub.Name}] ⚠ Download failed: {HubCalibrationSettingsFile}");
+                logger.Log(mLogger.LogLevel.ERROR, Name + "_DownloadCalibration", $"[{_hub.Name}] ⚠ Download failed: {HubCalibrationSettingsFile}");
                 return false;
             }
         }
@@ -582,14 +583,14 @@ namespace Dplus_Desktop
 
             if (remoteFiles.Count == 0)
             {
-                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"No .{fileExtension} files found on {_hub.Name}.");
+                logger.Log(mLogger.LogLevel.INFO, Name, $"No .{fileExtension} files found on {_hub.Name}.");
             }
             else
             {
                 if (!Directory.Exists(baseLocalDir))
                     Directory.CreateDirectory(baseLocalDir);
 
-                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Found {remoteFiles.Count} .{fileExtension} files on {_hub.Name}.");
+                logger.Log(mLogger.LogLevel.INFO, Name, $"Found {remoteFiles.Count} .{fileExtension} files on {_hub.Name}.");
                 
                 List<ClusterFileIOCommand> commands = new List<ClusterFileIOCommand>();
                 foreach (LinuxFileInfo file in remoteFiles)
@@ -614,14 +615,14 @@ namespace Dplus_Desktop
 
             if (remoteFiles.Count == 0)
             {
-                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"No .{fileExtension} files found on {node.Name}.");
+                logger.Log(mLogger.LogLevel.INFO, Name, $"No .{fileExtension} files found on {node.Name}.");
             }
             else
             {
                 if (!Directory.Exists(baseLocalDir))
                     Directory.CreateDirectory(baseLocalDir);
 
-                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Found {remoteFiles.Count} .{fileExtension} files on {node.Name}.");
+                logger.Log(mLogger.LogLevel.INFO, Name, $"Found {remoteFiles.Count} .{fileExtension} files on {node.Name}.");
 
                 List<ClusterFileIOCommand> commands = new List<ClusterFileIOCommand>();
                 foreach (LinuxFileInfo file in remoteFiles)
@@ -641,12 +642,12 @@ namespace Dplus_Desktop
 
         private async Task BackupBinFiles()
         {
-            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Backuping up previous bin files");
+            logger.Log(mLogger.LogLevel.INFO, Name, "Backuping up previous bin files");
             await _hubCom.DeleteHubFile("/home/camcpp/previous_hub");
             await _hubCom.MoveHubFile("/home/camcpp/hub", "/home/camcpp/previous_hub");
             await _hubCom.DeleteHubFile("/home/camcpp/previous_node");
             await _hubCom.MoveHubFile("/home/camcpp/node", "/home/camcpp/previous_node");
-            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Bin files backed up");
+            logger.Log(mLogger.LogLevel.INFO, Name, "Bin files backed up");
         }
         public async Task ManualRecompile(bool backupFirst)
         {
@@ -655,8 +656,8 @@ namespace Dplus_Desktop
             if (backupFirst)
                 await BackupBinFiles();
 
-            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Ready to recompile manually.  Please Run:");
-            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "time make -C /home/camcpp/build");
+            logger.Log(mLogger.LogLevel.INFO, Name, "Ready to recompile manually.  Please Run:");
+            logger.Log(mLogger.LogLevel.INFO, Name, "time make -C /home/camcpp/build");
         }
         public async Task AutoRecompile(bool backupFirst)
         {
@@ -665,28 +666,28 @@ namespace Dplus_Desktop
             if (backupFirst)
                 await BackupBinFiles();
 
-            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Recompiling...");
+            logger.Log(mLogger.LogLevel.INFO, Name, "Recompiling...");
             await _hubCom.ExecuteHubCommandAsync("make -C /home/camcpp/build");
-            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Recompilation Complete");
+            logger.Log(mLogger.LogLevel.INFO, Name, "Recompilation Complete");
         }
         public void CreateSettingsFiles()
         {
-            logger.Log(mLogger.LogLevel.INFO, "Uploader", "Creating new settings files...");
+            logger.Log(mLogger.LogLevel.INFO, Name, "Creating new settings files...");
 
             string hubPath = Settings.All.SourceFilesDirectory + "hubSettings.json";
             string backupHubPath = Settings.All.SourceFilesDirectory + "hubSettings_backup.json";
             if (File.Exists(hubPath))
             {
-                logger.Log(mLogger.LogLevel.INFO, "Uploader", "Saving new hubSettings_backup.json");
+                logger.Log(mLogger.LogLevel.INFO, Name, "Saving new hubSettings_backup.json");
                 File.Copy(hubPath, backupHubPath, true);
             }
-            logger.Log(mLogger.LogLevel.INFO, "Uploader", "Saving new hubSettings.json");
+            logger.Log(mLogger.LogLevel.INFO, Name, "Saving new hubSettings.json");
             ClusterProfile? profile = Settings.All.ClusterProfiles.FirstOrDefault(p => p.profileName == Settings.All.ClusterProfileToUse);
             if (profile != null)
                 Settings.SaveHubSettings(_hub, profile, hubPath);
             else
             {
-                logger.Log(mLogger.LogLevel.ERROR, "Uploader", "Could not find correct culster profile.  Check 'ManagerSettings.json'");
+                logger.Log(mLogger.LogLevel.ERROR, Name, "Could not find correct culster profile.  Check 'ManagerSettings.json'");
                 return;
             }
 
@@ -698,19 +699,19 @@ namespace Dplus_Desktop
                     string backupNodePath = Settings.All.SourceFilesDirectory + $"{node.Name}Settings_backup.json";
                     if (File.Exists(nodePath))
                     {
-                        logger.Log(mLogger.LogLevel.INFO, "Uploader", $"Saving new {node.Name}Settings_backup.json");
+                        logger.Log(mLogger.LogLevel.INFO, Name, $"Saving new {node.Name}Settings_backup.json");
                         File.Copy(nodePath, backupNodePath, true);
                     }
 
-                    logger.Log(mLogger.LogLevel.INFO, "Uploader", $"Saving new {node.Name}Settings.json");
+                    logger.Log(mLogger.LogLevel.INFO, Name, $"Saving new {node.Name}Settings.json");
                     Settings.SaveNodeSettings(node, Settings.All.ClusterProfiles.FirstOrDefault(p => p.profileName == Settings.All.ClusterProfileToUse), nodePath);
                 }
             }
-            logger.Log(mLogger.LogLevel.INFO, "Uploader", "Settings files creation complete.");
+            logger.Log(mLogger.LogLevel.INFO, Name, "Settings files creation complete.");
         }
         public async Task DistributeRuntimeFiles()  // Needs more asyncing
         {
-            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Distributing Runtime files");
+            logger.Log(mLogger.LogLevel.INFO, Name, "Distributing Runtime files");
             //  Copy Hub's settings file
             string hubSettingsStartingPath = Settings.All.SourceFilesDirectory + "hubSettings.json";
             string hubSettingsEndingPath = "/home/camcpp/src/hubSettings.json";
@@ -728,29 +729,29 @@ namespace Dplus_Desktop
                     await _hubCom.PCtoNodeAsync(new ClusterFileIOCommand(nodeSettingsEndingPath, nodeSettingsStartingPath, ClusterFileIOCommandType.Upload), node.APAddress, false);
                 }
 
-            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", "Runtime File Distribution Complete");
+            logger.Log(mLogger.LogLevel.INFO, Name, "Runtime File Distribution Complete");
         }
 
         public async Task startMain()
         {
             await _hubCom.ExecuteHubCommandAsync("sudo systemctl start hub.service");
-            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Starting service daemon on {_hub.Name}");
+            logger.Log(mLogger.LogLevel.INFO, Name, $"Starting service daemon on {_hub.Name}");
         
             foreach (Device node in _nodes)
             {
                 await _hubCom.ExecuteNodeCommandAsync($"sudo systemctl start node.service", node.APAddress, node.Username);
-                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Starting service daemon on {node.Name}");
+                logger.Log(mLogger.LogLevel.INFO, Name, $"Starting service daemon on {node.Name}");
             }
         }
         public async Task stopMain()
         {
             await _hubCom.ExecuteHubCommandAsync("sudo systemctl stop hub.service");
-            logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Stopping service daemon on {_hub.Name}");
+            logger.Log(mLogger.LogLevel.INFO, Name, $"Stopping service daemon on {_hub.Name}");
 
             foreach (Device node in _nodes)
             {
                 await _hubCom.ExecuteNodeCommandAsync($"sudo systemctl stop node.service", node.APAddress, node.Username);
-                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"Stopping service daemon on {node.Name}");
+                logger.Log(mLogger.LogLevel.INFO, Name, $"Stopping service daemon on {node.Name}");
             }
         }
 
@@ -762,17 +763,17 @@ namespace Dplus_Desktop
                 foreach (Device node in _nodes)
                 {
                     await _hubCom.ExecuteHubCommandAsync($"nohup ssh -tt {node.Username}@{node.APAddress} \"sudo shutdown -r +1\" > /dev/null 2>&1 &");
-                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"{node.Name} at {node.APAddress} is rebooting.");
+                    logger.Log(mLogger.LogLevel.INFO, Name, $"{node.Name} at {node.APAddress} is rebooting.");
                 }
 
                 await _hubCom.ExecuteHubCommandAsync("sudo shutdown -r now");
-                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"{_hub.Name} is rebooting.");
+                logger.Log(mLogger.LogLevel.INFO, Name, $"{_hub.Name} is rebooting.");
 
                 await _hubCom.DisconnectAsync();
             }
             catch (Exception ex)
             {
-                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", "Error: " + ex.Message);
+                logger.Log(mLogger.LogLevel.ERROR, Name, "Error: " + ex.Message);
             }
         }
         public async Task ShutdownCluster()
@@ -783,19 +784,19 @@ namespace Dplus_Desktop
                 foreach (Device node in _nodes)
                 {
                     await _hubCom.ExecuteHubCommandAsync($"nohup ssh -tt {node.Username}@{node.APAddress} \"sudo shutdown now\" > /dev/null 2>&1 &");
-                    logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"{node.Name} at {node.APAddress} is shutting down.");
+                    logger.Log(mLogger.LogLevel.INFO, Name, $"{node.Name} at {node.APAddress} is shutting down.");
                 }
 
                 await _hubCom.ExecuteHubCommandAsync("sudo shutdown now");
-                logger.Log(mLogger.LogLevel.INFO, "ClusterManager", $"{_hub.Name} is shutting down.");
+                logger.Log(mLogger.LogLevel.INFO, Name, $"{_hub.Name} is shutting down.");
 
                 await _hubCom.DisconnectAsync();
             }
             catch (Exception ex)
             {
-                logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", "Error Message:   " + ex.Message);
+                logger.Log(mLogger.LogLevel.ERROR, Name, "Error Message:   " + ex.Message);
                 if (ex.InnerException != null)
-                    logger.Log(mLogger.LogLevel.ERROR, "ClusterManager", "Inner Ex:        " + ex.InnerException.Message);
+                    logger.Log(mLogger.LogLevel.ERROR, Name, "Inner Ex:        " + ex.InnerException.Message);
             }
         }
 
@@ -804,9 +805,9 @@ namespace Dplus_Desktop
             for (int i = 0; i < 10; i++)
             {
                 if ((await CheckSystem()).SSHConnected) //slow (150 ms?)
-                    logger.Log(mLogger.LogLevel.DEBUG, "ClusterManager_IsConnected", $"Is Connected {i}");
+                    logger.Log(mLogger.LogLevel.DEBUG, Name + "_IsConnected", $"Is Connected {i}");
                 else
-                    logger.Log(mLogger.LogLevel.DEBUG, "ClusterManager_IsConnected", $"Is not Connected {i}");
+                    logger.Log(mLogger.LogLevel.DEBUG, Name + "_IsConnected", $"Is not Connected {i}");
             }
         }
     }
