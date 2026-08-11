@@ -308,11 +308,6 @@ namespace Dplus_Desktop
         }
         private async void Uploader_Load(object sender, EventArgs e)
         {
-            foreach (ClusterManager cluster in clusters.Values)
-            {
-                await cluster.ConnectAsync();
-            }
-
             await checkServiceStatus(clusters[Clusters_Box.Text]);
 
             UpdateManagedFiles_Boxes();

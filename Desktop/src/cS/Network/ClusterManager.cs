@@ -26,16 +26,16 @@ namespace Dplus_Desktop
         public ClusterManager(Device hub, List<Device> nodes)
         {
             logger.AddSource("ClusterManager");
+            logger.LogHeading(LogLevel.INFO, "ClusterManager", $"ClusterManager starting for {hub.ClusterID}.");
 
             _hub = hub;
             _hubCom = new Communicator(hub.IPAddress, hub.Username, hub.Password);
 
-            _nodes = new List<Device>();
-            if ((nodes != null) && (nodes.Count > 0))
-                foreach (Device node in nodes)
-                {
-                    _nodes.Add(node);
-                }
+            _nodes = nodes;
+            if ((_nodes == null) || (_nodes.Count == 0))
+                throw new ArgumentException($"Must have at least one active node for cluster {hub.ClusterID} to be valid.");
+
+            //_ = ConnectAsync();
 
             _hubCom.Connected += hubCom_Connected;
             _hubCom.Disconnected += hubCom_Disconnected;

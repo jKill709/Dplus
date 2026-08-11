@@ -63,7 +63,7 @@
             LiveLoggingBox.Name = "LiveLoggingBox";
             LiveLoggingBox.Size = new Size(953, 527);
             LiveLoggingBox.TabIndex = 2;
-            //LiveLoggingBox.Text = "";  // <- Curse this haunted line of code
+            LiveLoggingBox.Text = "";
             // 
             // Clusters_Box
             // 
@@ -95,6 +95,7 @@
             Controls.Add(Uploader_Button);
             Name = "Main";
             Text = "Main";
+            Load += Main_Load;
             ResumeLayout(false);
         }
 

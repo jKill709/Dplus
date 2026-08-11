@@ -105,5 +105,13 @@ namespace Dplus_Desktop
         {
             CurrentCluster_StatusStrip.UpdateStatus(await clusters[Clusters_Box.Text].CheckSystem());
         }
+
+        private async void Main_Load(object sender, EventArgs e)
+        {
+            foreach (ClusterManager cluster in clusters.Values)
+            {
+                await cluster.ConnectAsync();
+            }
+        }
     }
 }
