@@ -196,7 +196,7 @@ namespace Dplus_Desktop.SettingsManager
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                OutputText("GetNodeIndex: Name cannot be null or empty.", mLogger.LogLevel.ERROR);
+                OutputText("GetNodeIndex: logName cannot be null or empty.", mLogger.LogLevel.ERROR);
                 return -1;
             }
 

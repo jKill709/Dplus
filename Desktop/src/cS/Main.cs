@@ -16,6 +16,8 @@ namespace Dplus_Desktop
 {
     public partial class Main : Form
     {
+        private string logName = "CamManager";
+
         private Uploader? _uploader;   // These hold the single instances
         private Viewer? _viewer;       // of each form
 
@@ -30,13 +32,15 @@ namespace Dplus_Desktop
             InitializeComponent();
 
             _tbSink = new RichTextBoxSink(LiveLoggingBox);
-            _tbSink.AddSource("CamManager", Color.Red, true);
+            _tbSink.AddSource(logName, Color.Red, true);
             _logger.AddSink(_tbSink);
-            _logger.Log(LogLevel.INFO, "CamManager", "_tbSink Added");
+            _logger.Log(LogLevel.INFO, logName, "_tbSink Added");
 
-            _tfSink = new TextFileSink(Path.Combine(Settings.All.LocalLogPath, "CamManager"), "CamManager", ".log");
+            _tfSink = new TextFileSink(Path.Combine(Settings.All.LocalLogPath, logName), logName, ".log");
             _logger.AddSink(_tfSink);
-            _logger.Log(LogLevel.INFO, "CamManager", "_tfSink Added: " + Settings.All.LocalLogPath);
+            _logger.Log(LogLevel.INFO, logName, "_tfSink Added: " + Settings.All.LocalLogPath);
+
+            _logger.AddSource("ClusterManager");
 
             clusters = new Dictionary<string, ClusterManager>();
 
@@ -60,12 +64,12 @@ namespace Dplus_Desktop
                 Clusters_Box.SelectedIndex = 0;
             }
 
-            _logger.LogHeading(LogLevel.INFO, "CamManager", "Main Initialized");
+            _logger.LogHeading(LogLevel.INFO, logName, "Main Initialized");
         }
         private void AddLogSource(string source, Color color = default, bool andModules = true)
         {
-            _tbSink.AddSource(source, color, andModules);
-            _logger.Log(LogLevel.INFO, "CamManager", $"Added source '{source}' to _tbSink");
+            _logger.AddSource(source, color, andModules);
+            _logger.Log(LogLevel.INFO, logName, $"Added source '{source}' to _tbSink");
         }
 
         private async void UpdateClusterStatusControl(object? sender, EventArgs e)
