@@ -63,7 +63,7 @@
             LiveLoggingBox.Name = "LiveLoggingBox";
             LiveLoggingBox.Size = new Size(953, 527);
             LiveLoggingBox.TabIndex = 2;
-            LiveLoggingBox.Text = "";
+            //LiveLoggingBox.Text = "";  // <- Curse this haunted line of code
             // 
             // Clusters_Box
             // 

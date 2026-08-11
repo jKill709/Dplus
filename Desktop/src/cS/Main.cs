@@ -50,6 +50,16 @@ namespace Dplus_Desktop
                 cluster.Disconnected += UpdateClusterStatusControl;
             }
 
+            if (Clusters_Box.Items.Count == 0)
+            {
+                MessageBox.Show("No hubs configured. Please configure settings first.");
+                throw new Exception("No clusters available. Please configure settings first.");
+            }
+            else
+            {
+                Clusters_Box.SelectedIndex = 0;
+            }
+
             _logger.LogHeading(LogLevel.INFO, "CamManager", "Main Initialized");
         }
         private void AddLogSource(string source, Color color = default, bool andModules = true)
