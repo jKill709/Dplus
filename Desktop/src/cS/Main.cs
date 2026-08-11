@@ -66,6 +66,14 @@ namespace Dplus_Desktop
 
             _logger.LogHeading(LogLevel.INFO, logName, "Main Initialized");
         }
+        private async void Main_Load(object sender, EventArgs e)
+        {
+            foreach (ClusterManager cluster in clusters.Values)
+            {
+                await cluster.ConnectAsync();
+            }
+        }
+
         private void AddLogSource(string source, Color color = default, bool andModules = true)
         {
             _logger.AddSource(source, color, andModules);
@@ -95,7 +103,8 @@ namespace Dplus_Desktop
         {
             if (_viewer == null || _viewer.IsDisposed)
             {
-                _viewer = new Viewer();
+                AddLogSource("Viewer", Color.Blue, true);
+                _viewer = new Viewer(clusters[Clusters_Box.Text]);
                 _viewer.FormClosed += (s, args) => _viewer = null; // cleanup
                 _viewer.Show(this);
             }
@@ -110,12 +119,5 @@ namespace Dplus_Desktop
             CurrentCluster_StatusStrip.UpdateStatus(await clusters[Clusters_Box.Text].CheckSystem());
         }
 
-        private async void Main_Load(object sender, EventArgs e)
-        {
-            foreach (ClusterManager cluster in clusters.Values)
-            {
-                await cluster.ConnectAsync();
-            }
-        }
     }
 }

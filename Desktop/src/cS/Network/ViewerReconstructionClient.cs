@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Protocol;
-using System.Text;
-using System.Text.Json;
 
 using mLogger;
 
@@ -20,7 +17,7 @@ namespace Dplus_Desktop
         private readonly string _topic;
 
         private IMqttClient _client;
-        private MQTTnet.Client.MqttClientOptions _options;
+        private MqttClientOptions _options;
         private bool _lastAttemptFailed = false;
 
         private CancellationTokenSource _cts;
@@ -68,7 +65,8 @@ namespace Dplus_Desktop
 
             _client.DisconnectedAsync += e =>
             {
-                logger.Log(LogLevel.WARN, "MQTT Worker", "MQTT Disconnected");
+                if (!_lastAttemptFailed) 
+                    logger.Log(LogLevel.WARN, "MQTT Worker", "MQTT Disconnected");
                 return Task.CompletedTask;
             };
 
@@ -108,7 +106,7 @@ namespace Dplus_Desktop
                         }
 
                         _lastAttemptFailed = true;
-                        await Task.Delay(2000, token);
+                        await Task.Delay(5000, token);
                         continue;
                     }
                 }

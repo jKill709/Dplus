@@ -30,6 +30,8 @@ namespace Dplus_Desktop
 {
     public partial class Viewer : Form
     {
+        ClusterManager cluster;
+
         private static readonly JsonSerializerOptions Options = GetJsonSerializerOptions();
         public static readonly List<(int, int)> Skeleton = new()
         {
@@ -58,9 +60,9 @@ namespace Dplus_Desktop
         public Viewer()
         {
             InitializeComponent();
+            setControlablilty(false);
 
             logger.LogHeading(mLogger.LogLevel.INFO, "Viewer", "Viewer Initialing");
-            AddLogSource("Viewer", Color.Blue, true);
 
             // Add Overlays to ImageViewers
             _image1Overlay = new PrimitiveOverlayLayer();
@@ -91,7 +93,31 @@ namespace Dplus_Desktop
 
             UpdateViewers();
         }
+        public Viewer(ClusterManager inCluster) : this()
+        {
+            cluster = inCluster;
+
+            cluster.Connected += Cluster_Connected;
+            cluster.Disconnected += Cluster_Disconnected;
+        }
+
+        private void Cluster_Disconnected(object? sender, EventArgs e)
+        {
+            Cluster_StatusStrip.UpdateStatus(new ClusterStatus());
+            setControlablilty(false);
+        }
+        private async void Cluster_Connected(object? sender, EventArgs e)
+        {
+            Cluster_StatusStrip.UpdateStatus(await cluster.CheckSystem());
+            setControlablilty(true);
+        }
+
         private async void Viewer_Load(object sender, EventArgs e)
+        {
+            Cluster_StatusStrip.UpdateStatus(await cluster.CheckSystem());
+            await ConnecttoMQTT();
+        }
+        private async Task ConnecttoMQTT()
         {
             try
             {
@@ -172,7 +198,7 @@ namespace Dplus_Desktop
                     LiveViewFPS_Label.Text = $"{1.0 / delta.TotalSeconds:F2} FPS";
                 }
             }
-        }        
+        }
         private void LoadSavedRigFrames()
         {
             try
@@ -1322,7 +1348,55 @@ namespace Dplus_Desktop
         {
             LivePause_Button_Click(sender, e);
         }
-        
+
+        private void setControlablilty(bool enable)
+        {
+            Reboot_Button.Enabled = enable;
+            Shutdown_Button.Enabled = enable;
+            StartService_Button.Enabled = enable;
+            StopService_Button.Enabled = enable;
+        }
+        private async void ClusterStatusStrip_DoubleClick(object sender, EventArgs e)
+        {
+            setControlablilty(false);
+            await cluster.ConnectAsync();
+            Cluster_StatusStrip.UpdateStatus(await cluster.CheckSystem());
+            setControlablilty(true);
+        }
+        private async void StartService_Button_Click(object sender, EventArgs e)
+        {
+            setControlablilty(false);
+            await cluster.startMain();
+            Cluster_StatusStrip.UpdateStatus(await cluster.CheckSystem());
+            setControlablilty(true);
+        }
+        private async void StopService_Button_Click(object sender, EventArgs e)
+        {
+            setControlablilty(false);
+            await cluster.stopMain();
+
+            Cluster_StatusStrip.UpdateStatus(await cluster.CheckSystem());
+
+            await cluster.DownloadFiles();
+            setControlablilty(true);
+
+            LoadSavedRigFrames();
+        }
+        private async void Reboot_Button_Click(object sender, EventArgs e)
+        {
+            setControlablilty(false);
+            await cluster.RebootCluster();
+            Cluster_StatusStrip.UpdateStatus(new ClusterStatus());
+            setControlablilty(true);
+        }
+        private async void Shutdown_Button_Click(object sender, EventArgs e)
+        {
+            setControlablilty(false);
+            await cluster.ShutdownCluster();
+            Cluster_StatusStrip.UpdateStatus(await cluster.CheckSystem());
+            setControlablilty(true);
+        }
+
         private enum LivePlayerState
         {
             Play,

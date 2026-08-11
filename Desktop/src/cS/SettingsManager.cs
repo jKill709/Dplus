@@ -202,10 +202,10 @@ namespace Dplus_Desktop.SettingsManager
 
             name = name.Trim().ToLower();
 
-            // Must start with "node" or "hub"
-            if (!(name.StartsWith("node") || name.StartsWith("hub")))
+            // Must start with "node" or "Hub"
+            if (!(name.StartsWith("node") || name.StartsWith("Hub")))
             {
-                OutputText($"GetNodeIndex: Invalid prefix in '{name}'. Must start with 'node' or 'hub'.", mLogger.LogLevel.ERROR);
+                OutputText($"GetNodeIndex: Invalid prefix in '{name}'. Must start with 'node' or 'Hub'.", mLogger.LogLevel.ERROR);
                 return -1;
             }
 
@@ -246,7 +246,7 @@ namespace Dplus_Desktop.SettingsManager
             }
             if (nodes.Count == 0)
             {
-                throw new ArgumentException($"No nodes found with ClusterID {clusterID}.");
+                throw new ArgumentException($"No Nodes found with ClusterID {clusterID}.");
             }
             return nodes;
         }
@@ -302,7 +302,7 @@ namespace Dplus_Desktop.SettingsManager
 
             if (returnValue == null)
             {
-                throw new ArgumentException($"No extrinsics found for nodes {baseNodeName} and {targetNodeName}.");
+                throw new ArgumentException($"No extrinsics found for Nodes {baseNodeName} and {targetNodeName}.");
             }
 
             return returnValue;

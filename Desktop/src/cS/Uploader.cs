@@ -44,7 +44,7 @@ namespace Dplus_Desktop
 
         private async Task LoadNodes()
         {
-            logger.Log(LogLevel.INFO, this.Name, "Loading nodes for '" + Clusters_Box.SelectedItem?.ToString() + "'\n");
+            logger.Log(LogLevel.INFO, this.Name, "Loading Nodes for '" + Clusters_Box.SelectedItem?.ToString() + "'\n");
             Device hub = Settings.All.Hubs[Clusters_Box.SelectedIndex];
 
             Nodes_Box.Items.Clear();
@@ -369,7 +369,7 @@ namespace Dplus_Desktop
             await clusters[Clusters_Box.Text].DistributeRuntimeFiles();
             setControlablilty(true);
         }
-        private async void RunMain_Button_Click(object sender, EventArgs e)
+        private async void StartService_Button_Click(object sender, EventArgs e)
         {
             setControlablilty(false);
             await clusters[Clusters_Box.Text].startMain();

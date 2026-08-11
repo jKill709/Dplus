@@ -74,12 +74,12 @@
             Clusters_Box.TabIndex = 19;
             Clusters_Box.SelectedIndexChanged += Clusters_Box_SelectedIndexChanged;
             // 
-            // CurrentCluster_StatusStrip
+            // Cluster_StatusStrip
             // 
             CurrentCluster_StatusStrip.Font = new Font("Segoe UI", 8F);
             CurrentCluster_StatusStrip.Location = new Point(353, 4);
             CurrentCluster_StatusStrip.MinimumSize = new Size(150, 25);
-            CurrentCluster_StatusStrip.Name = "CurrentCluster_StatusStrip";
+            CurrentCluster_StatusStrip.Name = "Cluster_StatusStrip";
             CurrentCluster_StatusStrip.Size = new Size(342, 31);
             CurrentCluster_StatusStrip.TabIndex = 20;
             // 

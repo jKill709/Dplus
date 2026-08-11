@@ -142,7 +142,7 @@
             StartService_Button.TabIndex = 7;
             StartService_Button.Text = "Start";
             StartService_Button.UseVisualStyleBackColor = true;
-            StartService_Button.Click += RunMain_Button_Click;
+            StartService_Button.Click += StartService_Button_Click;
             // 
             // SystemCTLService_GroupBox
             // 
@@ -285,12 +285,12 @@
             Controls_GroupBox.TabStop = false;
             Controls_GroupBox.Text = "Controls";
             // 
-            // CurrentCluster_StatusStrip
+            // Cluster_StatusStrip
             // 
             CurrentCluster_StatusStrip.Font = new Font("Segoe UI", 8F);
             CurrentCluster_StatusStrip.Location = new Point(198, 4);
             CurrentCluster_StatusStrip.MinimumSize = new Size(150, 25);
-            CurrentCluster_StatusStrip.Name = "CurrentCluster_StatusStrip";
+            CurrentCluster_StatusStrip.Name = "Cluster_StatusStrip";
             CurrentCluster_StatusStrip.Size = new Size(342, 31);
             CurrentCluster_StatusStrip.TabIndex = 18;
             CurrentCluster_StatusStrip.DoubleClick += CheckServiceStatus_Button_Click;

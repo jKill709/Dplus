@@ -68,6 +68,11 @@
             panel1 = new Panel();
             DataSource_PanalLabel = new Label();
             Autofit_Button = new Button();
+            Cluster_StatusStrip = new Dplus_Desktop.WinForms.Controls.ClusterStatusDisplay.DeviceStatusStrip();
+            Shutdown_Button = new Button();
+            Reboot_Button = new Button();
+            StopService_Button = new Button();
+            StartService_Button = new Button();
             ((System.ComponentModel.ISupportInitialize)Objectness_Bar).BeginInit();
             ((System.ComponentModel.ISupportInitialize)KP_Bar).BeginInit();
             ((System.ComponentModel.ISupportInitialize)SavedFramesBoxIndex_UpDown).BeginInit();
@@ -182,9 +187,9 @@
             // 
             // CurrentFrame_View
             // 
-            CurrentFrame_View.Location = new Point(2, 206);
+            CurrentFrame_View.Location = new Point(7, 282);
             CurrentFrame_View.Name = "CurrentFrame_View";
-            CurrentFrame_View.Size = new Size(453, 595);
+            CurrentFrame_View.Size = new Size(448, 519);
             CurrentFrame_View.TabIndex = 13;
             // 
             // Objectness_Bar
@@ -455,7 +460,7 @@
             panel1.Controls.Add(SavedFrames_rButton);
             panel1.Controls.Add(LiveView_Group);
             panel1.Controls.Add(SavedFrames_Group);
-            panel1.Location = new Point(7, 27);
+            panel1.Location = new Point(6, 103);
             panel1.Name = "panel1";
             panel1.Size = new Size(449, 173);
             panel1.TabIndex = 25;
@@ -463,7 +468,7 @@
             // DataSource_PanalLabel
             // 
             DataSource_PanalLabel.AutoSize = true;
-            DataSource_PanalLabel.Location = new Point(10, 12);
+            DataSource_PanalLabel.Location = new Point(9, 88);
             DataSource_PanalLabel.Name = "DataSource_PanalLabel";
             DataSource_PanalLabel.Size = new Size(70, 15);
             DataSource_PanalLabel.TabIndex = 26;
@@ -479,11 +484,66 @@
             Autofit_Button.UseVisualStyleBackColor = true;
             Autofit_Button.Click += Autofit_Button_Click;
             // 
+            // Cluster_StatusStrip
+            // 
+            Cluster_StatusStrip.Font = new Font("Segoe UI", 8F);
+            Cluster_StatusStrip.Location = new Point(7, 27);
+            Cluster_StatusStrip.MinimumSize = new Size(150, 25);
+            Cluster_StatusStrip.Name = "Cluster_StatusStrip";
+            Cluster_StatusStrip.Size = new Size(449, 31);
+            Cluster_StatusStrip.TabIndex = 28;
+            Cluster_StatusStrip.DoubleClick += ClusterStatusStrip_DoubleClick;
+            // 
+            // Shutdown_Button
+            // 
+            Shutdown_Button.Location = new Point(135, 62);
+            Shutdown_Button.Name = "Shutdown_Button";
+            Shutdown_Button.Size = new Size(75, 23);
+            Shutdown_Button.TabIndex = 30;
+            Shutdown_Button.Text = "Shutdown";
+            Shutdown_Button.UseVisualStyleBackColor = true;
+            Shutdown_Button.Click += Shutdown_Button_Click;
+            // 
+            // Reboot_Button
+            // 
+            Reboot_Button.Location = new Point(54, 62);
+            Reboot_Button.Name = "Reboot_Button";
+            Reboot_Button.Size = new Size(75, 23);
+            Reboot_Button.TabIndex = 29;
+            Reboot_Button.Text = "Reboot";
+            Reboot_Button.UseVisualStyleBackColor = true;
+            Reboot_Button.Click += Reboot_Button_Click;
+            // 
+            // StopService_Button
+            // 
+            StopService_Button.Location = new Point(342, 62);
+            StopService_Button.Name = "StopService_Button";
+            StopService_Button.Size = new Size(75, 23);
+            StopService_Button.TabIndex = 32;
+            StopService_Button.Text = "Stop";
+            StopService_Button.UseVisualStyleBackColor = true;
+            StopService_Button.Click += StopService_Button_Click;
+            // 
+            // StartService_Button
+            // 
+            StartService_Button.Location = new Point(261, 62);
+            StartService_Button.Name = "StartService_Button";
+            StartService_Button.Size = new Size(75, 23);
+            StartService_Button.TabIndex = 31;
+            StartService_Button.Text = "Start";
+            StartService_Button.UseVisualStyleBackColor = true;
+            StartService_Button.Click += StartService_Button_Click;
+            // 
             // Viewer
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1876, 853);
+            Controls.Add(Shutdown_Button);
+            Controls.Add(Reboot_Button);
+            Controls.Add(StopService_Button);
+            Controls.Add(StartService_Button);
+            Controls.Add(Cluster_StatusStrip);
             Controls.Add(Autofit_Button);
             Controls.Add(DataSource_PanalLabel);
             Controls.Add(ShowDebug_Box);
@@ -565,5 +625,10 @@
         private ToolStripLabel LiveViewTimestamp_Label;
         private ToolStripLabel LiveViewFPS_Label;
         private Button Autofit_Button;
+        private WinForms.Controls.ClusterStatusDisplay.DeviceStatusStrip Cluster_StatusStrip;
+        private Button Shutdown_Button;
+        private Button Reboot_Button;
+        private Button StopService_Button;
+        private Button StartService_Button;
     }
 }
