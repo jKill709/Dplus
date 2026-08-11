@@ -1,15 +1,13 @@
 ﻿using Dplus_Desktop.SettingsManager;
 using jCommunicator;
 using mLogger;
+using System.Diagnostics.Metrics;
 
 namespace Dplus_Desktop
 {
     public partial class Uploader : Form
     {
         Dictionary<string, ClusterManager> clusters;
-        //ClusterManager currentCluster;
-
-        DateTime LastUploadTime;
 
         private Logger logger = Logger.Instance;
 
@@ -17,28 +15,24 @@ namespace Dplus_Desktop
         {
             InitializeComponent();
 
-            AddLogSource("Uploader");
-            AddLogSource("ClusterManager");
+            logger.LogHeading(LogLevel.INFO, this.Name, "Uploader Initialing");
+        }
+        public Uploader(Dictionary<string, ClusterManager> clusters) : this()
+        {
+            this.clusters = clusters;
 
-            logger.LogHeading(LogLevel.INFO, "Uploader", "Uploader Initialing");
-
-            //LastUploadTime = DateTime.MinValue;
-            clusters = new Dictionary<string, ClusterManager>();
-
-            foreach (Device hub in Settings.All.Hubs)
+            foreach ((string name, ClusterManager cluster) in clusters)
             {
-                ClusterManager cluster = new ClusterManager(hub, Settings.All.GetNodesByClusterID(hub.ClusterID));
-                clusters.Add(hub.ClusterID, cluster);
                 cluster.Connected += UpdateManagedFiles_Boxes;
                 cluster.Disconnected += UpdateManagedFiles_Boxes;
 
-                Clusters_Box.Items.Add(hub.ClusterID);
+                Clusters_Box.Items.Add(name);
             }
 
             if (Clusters_Box.Items.Count == 0)
             {
                 MessageBox.Show("No hubs configured. Please configure settings first.");
-                throw new Exception("No hubs configured. Please configure settings first.");
+                throw new Exception("No clusters available. Please configure settings first.");
             }
             else
             {
@@ -48,14 +42,9 @@ namespace Dplus_Desktop
             }
         }
 
-        private void AddLogSource(string source, Color color = default, bool andModules = true)
-        {
-            logger.AddSource(source, color, andModules);
-            logger.Log(mLogger.LogLevel.INFO, "Uploader", $"Added source '{source}' to _tbSink");
-        }
         private async Task LoadNodes()
         {
-            logger.Log(LogLevel.INFO, "Uploader", "Loading nodes for '" + Clusters_Box.SelectedItem?.ToString() + "'\n");
+            logger.Log(LogLevel.INFO, this.Name, "Loading nodes for '" + Clusters_Box.SelectedItem?.ToString() + "'\n");
             Device hub = Settings.All.Hubs[Clusters_Box.SelectedIndex];
 
             Nodes_Box.Items.Clear();
@@ -274,7 +263,7 @@ namespace Dplus_Desktop
                 else
                 {
                     color = Color.DarkRed;
-                    logger.Log(LogLevel.ERROR, "Uploader", $"Device not found in Settings.All.Nodes for name '{nodeItem.SubItems[0].Text}'.\n");
+                    logger.Log(LogLevel.ERROR, this.Name, $"Device not found in Settings.All.Nodes for name '{nodeItem.SubItems[0].Text}'.\n");
                 }
 
                 nodeItem.BackColor = color;
@@ -284,12 +273,6 @@ namespace Dplus_Desktop
         {
             setControlablilty(false);
             CurrentCluster_StatusStrip.UpdateStatus(await com.CheckSystem());
-            setControlablilty(true);
-        }
-        private async Task checkServiceStatus()
-        {
-            setControlablilty(false);
-            CurrentCluster_StatusStrip.UpdateStatus(await clusters[Clusters_Box.Text].CheckSystem());
             setControlablilty(true);
         }
 
@@ -315,7 +298,13 @@ namespace Dplus_Desktop
         {
             //SaveManagedFiles();
 
-            logger.LogHeading(LogLevel.INFO, "Uploader", "Uploader Exiting");
+            logger.LogHeading(LogLevel.INFO, this.Name, "Uploader Exiting");
+        }
+        private async void Uploader_Load(object sender, EventArgs e)
+        {
+            await checkServiceStatus(clusters[Clusters_Box.Text]);
+
+            UpdateManagedFiles_Boxes();
         }
         private async void CheckServiceStatus_Button_Click(object sender, EventArgs e)
         {
@@ -328,7 +317,7 @@ namespace Dplus_Desktop
             setControlablilty(false);
             try
             {
-                logger.Log(LogLevel.INFO, "Uploader", "Starting Upload Process.\n");
+                logger.Log(LogLevel.INFO, this.Name, "Starting Upload Process.\n");
 
                 // Ensure connection
                 await clusters[Clusters_Box.Text].CheckSSH(true);
@@ -339,12 +328,12 @@ namespace Dplus_Desktop
                 // Show new status in GUI
                 UpdateManagedFiles_Boxes();
 
-                logger.Log(LogLevel.INFO, "Uploader", "Upload process completed.\n");
+                logger.Log(LogLevel.INFO, this.Name, "Upload process completed.\n");
             }
             catch (Exception ex)
             {
-                logger.Log(LogLevel.ERROR, "Uploader", "Error: " + ex.Message + '\n');
-                logger.Log(LogLevel.INFO, "Uploader", "Upload Failed.\n");
+                logger.Log(LogLevel.ERROR, this.Name, "Error: " + ex.Message + '\n');
+                logger.Log(LogLevel.INFO, this.Name, "Upload Failed.\n");
             }
             finally
             {
@@ -425,16 +414,5 @@ namespace Dplus_Desktop
         }
         #endregion
 
-        private async void Uploader_Load(object sender, EventArgs e)
-        {
-            foreach (ClusterManager cluster in clusters.Values)
-            {
-                await cluster.ConnectAsync();
-            }
-
-            await checkServiceStatus(clusters[Clusters_Box.Text]);
-
-            UpdateManagedFiles_Boxes();
-        }
     }
 }

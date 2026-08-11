@@ -548,7 +548,7 @@ namespace Dplus_Desktop
         #region Coordinate Helpers
         public void AutoFit()
         {
-            //MessageBox.Show($"[{Name}] Auto-fitting...");
+            //MessageBox.Show($"[{logName}] Auto-fitting...");
             if (_points.Count == 0 && _lines.Count == 0 && _labels.Count == 0)
                 return;
 
@@ -599,11 +599,11 @@ namespace Dplus_Desktop
                 ClientSize.Width / 2f - cx * _zoom,
                 ClientSize.Height / 2f - cy * _zoom);
 
-            //MessageBox.Show($"[{Name}] Auto-fitted to bounds: ({minX}, {minY}) - ({maxX}, {maxY})");
+            //MessageBox.Show($"[{logName}] Auto-fitted to bounds: ({minX}, {minY}) - ({maxX}, {maxY})");
 
             Invalidate();
 
-            //MessageBox.Show($"[{Name}] Auto-fitted.");
+            //MessageBox.Show($"[{logName}] Auto-fitted.");
         }
         public PointF WorldToScreen(PointF p)
         {

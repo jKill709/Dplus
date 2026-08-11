@@ -91,7 +91,7 @@
             // 
             // FileName
             // 
-            FileName.Text = "Name";
+            FileName.Text = "logName";
             FileName.Width = 156;
             // 
             // LastUploaded
@@ -309,7 +309,7 @@
             // 
             // ModelName
             // 
-            ModelName.Text = "Model Name";
+            ModelName.Text = "Model logName";
             ModelName.Width = 126;
             // 
             // ModelType
@@ -377,7 +377,7 @@
             // 
             // RuntimeName
             // 
-            RuntimeName.Text = "Name";
+            RuntimeName.Text = "logName";
             RuntimeName.Width = 152;
             // 
             // columnHeader1
@@ -418,7 +418,7 @@
             // 
             // NodeName
             // 
-            NodeName.Text = "Node Name";
+            NodeName.Text = "Node logName";
             NodeName.Width = 119;
             // 
             // IPAddress

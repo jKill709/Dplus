@@ -205,7 +205,7 @@ namespace Dplus_Desktop
 
                             if (rigFrame != null)
                             {
-                                //logger.Log(mLogger.LogLevel.INFO, "Viewer", $"Deserialized CommandID: {rigFrame?.commandID}: {rigFrame?.camFrames.Count} frames, {rigFrame?.charucoRec?.charucoIds.Count()} charuco IDs");
+                                //_logger.Log(mLogger.LogLevel.INFO, "Viewer", $"Deserialized CommandID: {rigFrame?.commandID}: {rigFrame?.camFrames.Count} frames, {rigFrame?.charucoRec?.charucoIds.Count()} charuco IDs");
                                 framePairs.Add((rigFrame, fileName));
                             }
                             else
