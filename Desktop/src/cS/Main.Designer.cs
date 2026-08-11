@@ -31,6 +31,8 @@
             Uploader_Button = new Button();
             Viewer_Button = new Button();
             LiveLoggingBox = new RichTextBox();
+            Clusters_Box = new ComboBox();
+            CurrentCluster_StatusStrip = new Dplus_Desktop.WinForms.Controls.ClusterStatusDisplay.DeviceStatusStrip();
             SuspendLayout();
             // 
             // Uploader_Button
@@ -61,12 +63,33 @@
             LiveLoggingBox.Name = "LiveLoggingBox";
             LiveLoggingBox.Size = new Size(953, 527);
             LiveLoggingBox.TabIndex = 2;
+            LiveLoggingBox.Text = "";
+            // 
+            // Clusters_Box
+            // 
+            Clusters_Box.FormattingEnabled = true;
+            Clusters_Box.Location = new Point(150, 12);
+            Clusters_Box.Name = "Clusters_Box";
+            Clusters_Box.Size = new Size(197, 23);
+            Clusters_Box.TabIndex = 19;
+            Clusters_Box.SelectedIndexChanged += Clusters_Box_SelectedIndexChanged;
+            // 
+            // CurrentCluster_StatusStrip
+            // 
+            CurrentCluster_StatusStrip.Font = new Font("Segoe UI", 8F);
+            CurrentCluster_StatusStrip.Location = new Point(353, 4);
+            CurrentCluster_StatusStrip.MinimumSize = new Size(150, 25);
+            CurrentCluster_StatusStrip.Name = "CurrentCluster_StatusStrip";
+            CurrentCluster_StatusStrip.Size = new Size(342, 31);
+            CurrentCluster_StatusStrip.TabIndex = 20;
             // 
             // Main
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(977, 580);
+            Controls.Add(Clusters_Box);
+            Controls.Add(CurrentCluster_StatusStrip);
             Controls.Add(LiveLoggingBox);
             Controls.Add(Viewer_Button);
             Controls.Add(Uploader_Button);
@@ -80,5 +103,7 @@
         private Button Uploader_Button;
         private Button Viewer_Button;
         private RichTextBox LiveLoggingBox;
+        private ComboBox Clusters_Box;
+        private WinForms.Controls.ClusterStatusDisplay.DeviceStatusStrip CurrentCluster_StatusStrip;
     }
 }

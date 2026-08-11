@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 namespace Dplus_Desktop
 {
     // Manages one Dplus_Embedded cluster (1 Hub and many Nodes) using a jCommunicator.Communicator.  Provides Dplus specific functionality.
-    class ClusterManager
+    public class ClusterManager
     {
         public event EventHandler<EventArgs>? Connected;
         public event EventHandler<EventArgs>? Disconnected;
@@ -25,6 +25,8 @@ namespace Dplus_Desktop
 
         public ClusterManager(Device hub, List<Device> nodes)
         {
+            logger.AddSource("ClusterManager");
+
             _hub = hub;
             _hubCom = new Communicator(hub.IPAddress, hub.Username, hub.Password);
 

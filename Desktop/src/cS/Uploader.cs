@@ -1,15 +1,13 @@
 ﻿using Dplus_Desktop.SettingsManager;
 using jCommunicator;
 using mLogger;
+using System.Diagnostics.Metrics;
 
 namespace Dplus_Desktop
 {
     public partial class Uploader : Form
     {
         Dictionary<string, ClusterManager> clusters;
-        //ClusterManager currentCluster;
-
-        DateTime LastUploadTime;
 
         private Logger logger = Logger.Instance;
 
@@ -18,27 +16,24 @@ namespace Dplus_Desktop
             InitializeComponent();
 
             AddLogSource("Uploader");
-            AddLogSource("ClusterManager");
-
             logger.LogHeading(LogLevel.INFO, "Uploader", "Uploader Initialing");
+        }
+        public Uploader(Dictionary<string, ClusterManager> clusters) : this()
+        {
+            this.clusters = clusters;
 
-            //LastUploadTime = DateTime.MinValue;
-            clusters = new Dictionary<string, ClusterManager>();
-
-            foreach (Device hub in Settings.All.Hubs)
+            foreach ((string name, ClusterManager cluster) in clusters)
             {
-                ClusterManager cluster = new ClusterManager(hub, Settings.All.GetNodesByClusterID(hub.ClusterID));
-                clusters.Add(hub.ClusterID, cluster);
                 cluster.Connected += UpdateManagedFiles_Boxes;
                 cluster.Disconnected += UpdateManagedFiles_Boxes;
 
-                Clusters_Box.Items.Add(hub.ClusterID);
+                Clusters_Box.Items.Add(name);
             }
 
             if (Clusters_Box.Items.Count == 0)
             {
                 MessageBox.Show("No hubs configured. Please configure settings first.");
-                throw new Exception("No hubs configured. Please configure settings first.");
+                throw new Exception("No clusters available. Please configure settings first.");
             }
             else
             {
@@ -286,12 +281,6 @@ namespace Dplus_Desktop
             CurrentCluster_StatusStrip.UpdateStatus(await com.CheckSystem());
             setControlablilty(true);
         }
-        private async Task checkServiceStatus()
-        {
-            setControlablilty(false);
-            CurrentCluster_StatusStrip.UpdateStatus(await clusters[Clusters_Box.Text].CheckSystem());
-            setControlablilty(true);
-        }
 
         private void setControlablilty(bool enable)
         {
@@ -316,6 +305,17 @@ namespace Dplus_Desktop
             //SaveManagedFiles();
 
             logger.LogHeading(LogLevel.INFO, "Uploader", "Uploader Exiting");
+        }
+        private async void Uploader_Load(object sender, EventArgs e)
+        {
+            foreach (ClusterManager cluster in clusters.Values)
+            {
+                await cluster.ConnectAsync();
+            }
+
+            await checkServiceStatus(clusters[Clusters_Box.Text]);
+
+            UpdateManagedFiles_Boxes();
         }
         private async void CheckServiceStatus_Button_Click(object sender, EventArgs e)
         {
@@ -425,16 +425,5 @@ namespace Dplus_Desktop
         }
         #endregion
 
-        private async void Uploader_Load(object sender, EventArgs e)
-        {
-            foreach (ClusterManager cluster in clusters.Values)
-            {
-                await cluster.ConnectAsync();
-            }
-
-            await checkServiceStatus(clusters[Clusters_Box.Text]);
-
-            UpdateManagedFiles_Boxes();
-        }
     }
 }
