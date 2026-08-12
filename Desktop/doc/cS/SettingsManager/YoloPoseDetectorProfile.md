@@ -1,6 +1,6 @@
 # YoloPoseDetectorProfile
 
-**Namespace:** `Dplus_Desktop.SettingsManager`
+**Namespace:** `Dplus_Desktop.Config`
 
 ## Purpose
 
