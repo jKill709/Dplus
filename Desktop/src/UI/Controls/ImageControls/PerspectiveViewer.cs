@@ -261,6 +261,39 @@ namespace Dplus_Desktop.UI.Controls.ImageControls
         }
         private void DrawLine3D(Graphics g, Vector3 a, Vector3 b, Color color)
         {
+            var view = GetCameraMatrix();
+            var proj = GetProjectionMatrix();
+
+            // World → View → Clip
+            Vector4 p1 = Vector4.Transform(new Vector4(a, 1f), view);
+            Vector4 p2 = Vector4.Transform(new Vector4(b, 1f), view);
+
+            p1 = Vector4.Transform(p1, proj);
+            p2 = Vector4.Transform(p2, proj);
+
+            // Clip the line against the view frustum.
+            if (!ClipLineToFrustum(ref p1, ref p2))
+                return;
+
+            // Perspective divide → NDC
+            float ndcX1 = p1.X / p1.W;
+            float ndcY1 = p1.Y / p1.W;
+
+            float ndcX2 = p2.X / p2.W;
+            float ndcY2 = p2.Y / p2.W;
+
+            // NDC → Screen
+            float x1 = (ndcX1 * 0.5f + 0.5f) * ClientSize.Width;
+            float y1 = (1f - (ndcY1 * 0.5f + 0.5f)) * ClientSize.Height;
+
+            float x2 = (ndcX2 * 0.5f + 0.5f) * ClientSize.Width;
+            float y2 = (1f - (ndcY2 * 0.5f + 0.5f)) * ClientSize.Height;
+
+            using var pen = new Pen(color);
+            g.DrawLine(pen, x1, y1, x2, y2);
+        }
+        private void OLD_DrawLine3D(Graphics g, Vector3 a, Vector3 b, Color color)
+        {
             var p1 = Project(a);
             var p2 = Project(b);
 
@@ -558,19 +591,16 @@ namespace Dplus_Desktop.UI.Controls.ImageControls
             var rot = Matrix4x4.CreateFromYawPitchRoll(_yaw, _pitch, _roll);
             return Vector3.Transform(-Vector3.UnitZ, rot);
         }
-
         private Vector3 GetCameraPosition()
         {
             var rotation = Matrix4x4.CreateFromYawPitchRoll(_yaw, _pitch, _roll);
             var forward = Vector3.Transform(-Vector3.UnitZ, rotation);
             return _target - forward * _distance;
         }
-
         private string FormatVec(Vector3 v)
         {
             return $"({v.X:0.##}, {v.Y:0.##}, {v.Z:0.##})";
         }
-
         private Vector3 ScreenToWorld(Point p)
         {
             float width = ClientSize.Width;
@@ -604,6 +634,77 @@ namespace Dplus_Desktop.UI.Controls.ImageControls
             float t = (_target.Z - rayOrigin.Z) / rayDir.Z;
 
             return rayOrigin + rayDir * t;
+        }
+        private bool ClipLineToFrustum(ref Vector4 p1, ref Vector4 p2)
+        {
+            // The clip-space frustum is defined by:
+            //
+            //   -W <= X <= W
+            //   -W <= Y <= W
+            //   -W <= Z <= W
+            //
+            // Each plane can therefore be represented as:
+            //
+            //   X + W >= 0     left
+            //   W - X >= 0     right
+            //   Y + W >= 0     bottom
+            //   W - Y >= 0     top
+            //   Z + W >= 0     near
+            //   W - Z >= 0     far
+
+            if (!ClipLineAgainstPlane(ref p1, ref p2, v => v.X + v.W))
+                return false;
+
+            if (!ClipLineAgainstPlane(ref p1, ref p2, v => v.W - v.X))
+                return false;
+
+            if (!ClipLineAgainstPlane(ref p1, ref p2, v => v.Y + v.W))
+                return false;
+
+            if (!ClipLineAgainstPlane(ref p1, ref p2, v => v.W - v.Y))
+                return false;
+
+            if (!ClipLineAgainstPlane(ref p1, ref p2, v => v.Z + v.W))
+                return false;
+
+            if (!ClipLineAgainstPlane(ref p1, ref p2, v => v.W - v.Z))
+                return false;
+
+            return true;
+        }
+        private bool ClipLineAgainstPlane(ref Vector4 p1, ref Vector4 p2, Func<Vector4, float> distance)
+        {
+            float d1 = distance(p1);
+            float d2 = distance(p2);
+
+            // Both points are outside the plane.
+            if (d1 < 0f && d2 < 0f)
+                return false;
+
+            // Both points are inside (or exactly on) the plane.
+            if (d1 >= 0f && d2 >= 0f)
+                return true;
+
+            // The line crosses the plane.
+            //
+            // p(t) = p1 + t(p2 - p1)
+            //
+            // Solve:
+            //
+            // distance(p(t)) = 0
+            //
+            // t = d1 / (d1 - d2)
+
+            float t = d1 / (d1 - d2);
+
+            Vector4 intersection = p1 + (p2 - p1) * t;
+
+            if (d1 < 0f)
+                p1 = intersection;
+            else
+                p2 = intersection;
+
+            return true;
         }
 
         #endregion
