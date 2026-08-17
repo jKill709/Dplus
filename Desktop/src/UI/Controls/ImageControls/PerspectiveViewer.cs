@@ -61,7 +61,27 @@ namespace Dplus_Desktop.UI.Controls.ImageControls
         }
         public void AddCamera(CameraModel camera)
         {
+            if (camera == null)
+                throw new ArgumentNullException(nameof(camera));
+
             _cameras.Add(camera);
+            Invalidate();
+        }
+        public void RemoveCamera(CameraModel camera)
+        {
+            if (camera == null)
+                throw new ArgumentNullException(nameof(camera));
+
+            if (_cameras.Remove(camera))
+                Invalidate();
+        }
+        public void ClearCameras()
+        {
+            if (_cameras.Count == 0)
+                return;
+
+            _cameras.Clear();
+            Invalidate();
         }
 
 
@@ -292,17 +312,6 @@ namespace Dplus_Desktop.UI.Controls.ImageControls
             using var pen = new Pen(color);
             g.DrawLine(pen, x1, y1, x2, y2);
         }
-        private void OLD_DrawLine3D(Graphics g, Vector3 a, Vector3 b, Color color)
-        {
-            var p1 = Project(a);
-            var p2 = Project(b);
-
-            if (!p1.HasValue || !p2.HasValue)
-                return;
-
-            using var pen = new Pen(color);
-            g.DrawLine(pen, p1.Value, p2.Value);
-        }
         private void DrawDebug(Graphics g)
         {
             if (ShowDebug)
@@ -383,63 +392,76 @@ namespace Dplus_Desktop.UI.Controls.ImageControls
         }
         private void DrawCameraAxes(Graphics g, CameraModel camera)
         {
-            float size = camera.FarClip * 0.2f;
+            float size = camera.FrustumFar * 0.2f;
 
             Vector3 origin = camera.Position;
 
-            DrawLine3D(
-                g,
-                origin,
-                camera.TransformPoint(new Vector3(size, 0, 0)),
-                Color.Red);
+            // OpenCV camera coordinate system:
+            //
+            //      +X = right
+            //      +Y = down
+            //      +Z = forward
+            //
+            DrawLine3D(g, origin, camera.TransformPoint(new Vector3(size, 0f, 0f)), Color.Red);
 
-            DrawLine3D(
-                g,
-                origin,
-                camera.TransformPoint(new Vector3(0, size, 0)),
-                Color.Green);
+            DrawLine3D(g, origin, camera.TransformPoint(new Vector3(0f, size, 0f)), Color.Green);
 
-            DrawLine3D(
-                g,
-                origin,
-                camera.TransformPoint(new Vector3(0, 0, size)),
-                Color.Blue);
+            DrawLine3D(g, origin,camera.TransformPoint(new Vector3(0f, 0f, size)), Color.Blue);
         }
         private void DrawCameraFrustum(Graphics g, CameraModel camera)
         {
-            var c = GetFrustumCorners(camera);
+            Vector3[] corners = camera.GetFrustumCorners();
 
-            int[,] edges = {{0,1},{1,2},{2,3},{3,0},
-                            {4,5},{5,6},{6,7},{7,4},
-                            {0,4},{1,5},{2,6},{3,7}};
+            // Corner ordering:
+            //
+            // Near:
+            //
+            //   0 -------- 1
+            //   |          |
+            //   |          |
+            //   3 -------- 2
+            //
+            // Far:
+            //
+            //   4 -------- 5
+            //   |          |
+            //   |          |
+            //   7 -------- 6
+
+            int[,] edges = { { 0, 1 }, // Near plane
+                             { 1, 2 },
+                             { 2, 3 },
+                             { 3, 0 },
+                             
+                             { 4, 5 }, // Far plane
+                             { 5, 6 },
+                             { 6, 7 },
+                             { 7, 4 },
+
+                             { 0, 4 }, // Connecting edges
+                             { 1, 5 },
+                             { 2, 6 },
+                             { 3, 7 } };
 
             for (int i = 0; i < edges.GetLength(0); i++)
             {
-                DrawLine3D(
-                    g,
-                    c[edges[i, 0]],
-                    c[edges[i, 1]],
-                    camera.Color);
+                DrawLine3D(g, corners[edges[i, 0]], corners[edges[i, 1]], camera.Color);
             }
         }
         private void DrawCameraImagePlane(Graphics g, CameraModel camera)
         {
-            var c = GetFrustumCorners(camera);
+            Vector3[] corners = camera.GetFrustumCorners();
 
-            using var pen = new Pen(Color.Yellow, 2);
+            using var pen = new Pen(Color.Yellow, 2f);
 
-            DrawLine3D(g, c[0], c[1], pen.Color);
-            DrawLine3D(g, c[1], c[2], pen.Color);
-            DrawLine3D(g, c[2], c[3], pen.Color);
-            DrawLine3D(g, c[3], c[0], pen.Color);
+            DrawLine3D(g, corners[0], corners[1], pen.Color);
+            DrawLine3D(g, corners[1], corners[2], pen.Color);
+            DrawLine3D(g, corners[2], corners[3], pen.Color);
+            DrawLine3D(g, corners[3], corners[0], pen.Color);
         }
         private void DrawCameraCenterRay(Graphics g, CameraModel camera)
         {
-            DrawLine3D(
-                g,
-                camera.Position,
-                camera.TransformPoint(new Vector3(0, 0, camera.FarClip)),
-                Color.White);
+            DrawLine3D(g, camera.Position, camera.TransformPoint(new Vector3(0f, 0f, camera.FrustumFar)), Color.White);
         }
         private void DrawCameraLabel(Graphics g, CameraModel camera)
         {
@@ -466,38 +488,7 @@ namespace Dplus_Desktop.UI.Controls.ImageControls
                 Brushes.White,
                 rect.X + 2,
                 rect.Y + 2);
-        }
-        private Vector3[] GetFrustumCorners(CameraModel camera)
-        {
-            float near = camera.NearClip;
-            float far = camera.FarClip;
-
-            float nearHeight = 2f * MathF.Tan(camera.VerticalFov * 0.5f) * near;
-            float nearWidth = nearHeight * camera.AspectRatio;
-
-            float farHeight = 2f * MathF.Tan(camera.VerticalFov * 0.5f) * far;
-            float farWidth = farHeight * camera.AspectRatio;
-
-            Vector3[] local =
-            {
-        // Near
-        new(-nearWidth/2,  nearHeight/2, near),
-        new( nearWidth/2,  nearHeight/2, near),
-        new( nearWidth/2, -nearHeight/2, near),
-        new(-nearWidth/2, -nearHeight/2, near),
-
-        // Far
-        new(-farWidth/2,  farHeight/2, far),
-        new( farWidth/2,  farHeight/2, far),
-        new( farWidth/2, -farHeight/2, far),
-        new(-farWidth/2, -farHeight/2, far)
-    };
-
-            for (int i = 0; i < 8; i++)
-                local[i] = camera.TransformPoint(local[i]);
-
-            return local;
-        }
+        }        
 
         #endregion
 
